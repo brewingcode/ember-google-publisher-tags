@@ -18,6 +18,7 @@ Optional properties:
 * `placement=N`: Differentiate ads that use the same `adId` on a single page.
 For example, one ad might be `placement="upper right"`, while another might be
 `placement="lower left"`.
+* `tracing=true`: Turn on `Ember.Logger.log` tracing.
 
 ## Installation
 
