@@ -45,7 +45,7 @@ export default GPT.extend({
 
 ## Installation
 
-1. `ember install Ember-google-publisher-tags`
+1. `ember install ember-google-publisher-tags`
 
 2. Add the following initialization boilerplate to your `<head>`:
 
