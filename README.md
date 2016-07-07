@@ -1,26 +1,49 @@
-# Ember-google-pubisher-tags
+# ember-google-publisher-tags
 
-This README outlines the details of collaborating on this Ember addon.
+An Ember component for adding [GPT](https://support.google.com/dfp_sb/answer/1649768?hl=en)
+ads to your site.
+
+## Usage
+
+```hbs
+{{gpt-ad adId="/6355419/Travel/Europe/France/Paris" width=300 height=250}}
+```
+
+The `adId` is taken straight from DFP's "Generate Tags" link. The above is a
+sample ad on Google's ad network.
+
+Optional properties:
+
+* `refresh=N`: Refresh the ad after `N` seconds.
+* `placement=N`: Differentiate ads that use the same `adId` on a single page.
+For example, one ad might be `placement="upper right"`, while another might be
+`placement="lower left"`.
 
 ## Installation
 
-* `git clone` this repository
-* `npm install`
-* `bower install`
+1. `ember install Ember-google-publisher-tags`
 
-## Running
+2. Add the following initialization boilerplate to your `<head>`:
 
-* `ember server`
-* Visit your app at http://localhost:4200.
+```js
+<script type='text/javascript'>
+  var googletag = googletag || {};
+  googletag.cmd = googletag.cmd || [];
+  (function() {
+    var gads = document.createElement('script');
+    gads.async = true;
+    gads.type = 'text/javascript';
+    var useSSL = 'https:' == document.location.protocol;
+    gads.src = (useSSL ? 'https:' : 'http:') +
+      '//www.googletagservices.com/tag/js/gpt.js';
+    var node = document.getElementsByTagName('script')[0];
+    node.parentNode.insertBefore(gads, node);
+  })();
+</script>
+```
 
-## Running Tests
+## Docs
 
-* `npm test` (Runs `ember try:testall` to test your addon against multiple Ember versions)
-* `ember test`
-* `ember test --server`
-
-## Building
-
-* `ember build`
-
-For more information on using ember-cli, visit [http://ember-cli.com/](http://ember-cli.com/).
+* [GPT Boilerplate (annotated)](https://support.google.com/dfp_premium/answer/1638622?hl=en&ref_topic=4389931)
+* [GPT Reference](https://developers.google.com/doubleclick-gpt/reference)
+* [Ad Sizes](https://support.google.com/adsense/answer/185666)

@@ -2,5 +2,5 @@
 'use strict';
 
 module.exports = {
-  name: 'ember-google-pubisher-tags'
+  name: 'ember-google-publisher-tags'
 };
