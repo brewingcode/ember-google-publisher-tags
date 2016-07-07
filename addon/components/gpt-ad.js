@@ -83,7 +83,9 @@ export default Component.extend({
         googletag.cmd.push( () => {
             this.trace('refreshing now');
             let slot = get(this, 'slot');
-            this.addTargeting(slot); // todo: is this needed?
+            if (this.addTargeting) {
+                this.addTargeting(slot);
+            }
             googletag.pubads().refresh([slot]);
             this.waitForRefresh();
         });
