@@ -60,6 +60,7 @@ export default Component.extend({
 
     addTargeting(slot) { // jshint ignore:line
         // override this in child components, if needed, but an example is:
+        // slot.setTargeting('placement', get(this, 'placement'));
         // slot.setTargeting('planet', 'Earth');
     },
     waitForRefresh() {

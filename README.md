@@ -32,6 +32,7 @@ export default GPT.extend({
     tracing: true, // useful for development, especially if it's computed
 
     addTargeting(slot) {
+        slot.setTargeting('placement', this.get('placement'));
         slot.setTargeting('age', '100');
         // ... more targeting, if desired
     }
