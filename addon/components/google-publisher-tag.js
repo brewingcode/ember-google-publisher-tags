@@ -17,7 +17,7 @@ import {task, timeout} from 'ember-concurrency';
 
 const {
     assert, get, set, getProperties, Component,
-    String: { htmlSafe, dasherize },
+    String: { htmlSafe },
     Logger: { log }
 } = Ember;
 
@@ -40,11 +40,6 @@ export default Component.extend({
 
         let style = `width:${width}px; height:${height}px;`;
         set(this, 'style', htmlSafe(style));
-
-        // strip off optional leading slash, and then strip off everything up to
-        // the first slash
-        let elementId = adId.replace(/^\/?[^\/]+\//, '');
-        set(this, 'elementId', dasherize(`${elementId}-${placement}`));
     },
     didInsertElement() {
         this._super(...arguments);
@@ -76,7 +71,8 @@ export default Component.extend({
     },
     trace() {
         if (get(this, 'tracing')) {
-            log(`${get(this, 'elementId')}: `, ...arguments);
+            let {adId, placement} = getProperties(this, 'adId', 'placement');
+            log(`${adId} (${placement}): `, ...arguments);
         }
     },
 
