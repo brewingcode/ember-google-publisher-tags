@@ -6,7 +6,7 @@ ads to your site.
 ## Usage
 
 ```hbs
-{{gpt-ad adId="/6355419/Travel/Europe/France/Paris" width=300 height=250}}
+{{google-publisher-tag adId="/6355419/Travel/Europe/France/Paris" width=300 height=250}}
 ```
 
 The `adId` is taken straight from DFP's "Generate Tags" link. The above is a
@@ -25,10 +25,10 @@ ads, extend the `GooglePublisherTag` component and include an `addTargeting`
 function in your child component:
 
 ```js
-// your-ad-component.js
-import GooglePublisherTag from 'ember-google-publisher-tags/component';
+// components/your-ad.js
+import GPT from 'ember-google-publisher-tags/components/google-publisher-tag';
 
-export default GooglePublisherTag.extend({
+export default GPT.extend({
     tracing: true, // useful for development, especially if it's computed
 
     addTargeting(slot) {
@@ -36,6 +36,11 @@ export default GooglePublisherTag.extend({
         // ... more targeting, if desired
     }
 };
+```
+
+```hbs
+<!-- application.hbs -->
+{{your-ad adId="..." width=300 height=250}}
 ```
 
 ## Installation
