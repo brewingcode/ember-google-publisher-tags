@@ -22,7 +22,7 @@ const {
 } = Ember;
 
 export default Component.extend({
-    classNames: ['gpt-ad'],
+    classNames: ['google-publisher-tag'],
     attributeBindings: ['style'],
 
     placement: 0,
