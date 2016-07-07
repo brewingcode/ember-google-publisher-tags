@@ -20,6 +20,24 @@ For example, one ad might be `placement="upper right"`, while another might be
 `placement="lower left"`.
 * `tracing=true`: Turn on `Ember.Logger.log` tracing.
 
+Additionally, if you want to use GPT's `setTargeting` function to serve targeted
+ads, extend the `GooglePublisherTag` component and include an `addTargeting`
+function in your child component:
+
+```js
+// your-ad-component.js
+import GooglePublisherTag from 'ember-google-publisher-tags/component';
+
+export default GooglePublisherTag.extend({
+    tracing: true, // useful for development, especially if it's computed
+
+    addTargeting(slot) {
+        slot.setTargeting('age', '100');
+        // ... more targeting, if desired
+    }
+};
+```
+
 ## Installation
 
 1. `ember install Ember-google-publisher-tags`
