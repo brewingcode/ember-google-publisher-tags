@@ -36,7 +36,7 @@ export default Component.extend({
 
         // width and height are also passed into .defineSlot(), which will
         // silently fail unless they are actually numbers
-        assert(`gpt-ad "${adId}": width and height must be numbers`, typeof width === 'number' && typeof height === 'number');
+        assert(`google-publisher-tag "${adId} (${placement})k": width and height must be numbers`, typeof width === 'number' && typeof height === 'number');
 
         let style = `width:${width}px; height:${height}px;`;
         set(this, 'style', htmlSafe(style));
@@ -52,11 +52,10 @@ export default Component.extend({
         let googletag = window.googletag;
         let {adId, width, height, elementId} = getProperties(this, 'adId', 'width', 'height', 'elementId');
         googletag.cmd.push( () => {
+            this.trace(`defining slot ${adId} for div ${elementId}`);
             let slot = googletag.defineSlot(adId, [width, height], elementId)
                 .addService(googletag.pubads());
-            if (this.addTargeting) {
-                this.addTargeting(slot);
-            }
+            this.addTargeting(slot);
             googletag.enableServices();
             googletag.display(elementId);
             set(this, 'slot', slot);
@@ -64,10 +63,14 @@ export default Component.extend({
         });
     },
 
+    addTargeting(slot) { // jshint ignore:line
+        // override this in child components, if needed, but an example is:
+        // slot.setTargeting('planet', 'Earth');
+    },
     waitForRefresh() {
         let duration = get(this, 'refresh');
-        this.trace(`will refresh in ${duration} seconds`);
         if (duration > 0) {
+            this.trace(`will refresh in ${duration} seconds`);
             get(this, 'doRefresh').perform(duration);
         }
     },
@@ -83,9 +86,7 @@ export default Component.extend({
         googletag.cmd.push( () => {
             this.trace('refreshing now');
             let slot = get(this, 'slot');
-            if (this.addTargeting) {
-                this.addTargeting(slot);
-            }
+            this.addTargeting(slot);
             googletag.pubads().refresh([slot]);
             this.waitForRefresh();
         });

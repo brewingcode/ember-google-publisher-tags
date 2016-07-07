@@ -21,7 +21,7 @@ For example, one ad might be `placement="upper right"`, while another might be
 * `tracing=true`: Turn on `Ember.Logger.log` tracing.
 
 Additionally, if you want to use GPT's `setTargeting` function to serve targeted
-ads, extend the `GooglePublisherTag` component and include an `addTargeting`
+ads, extend the `GooglePublisherTag` component and override the `addTargeting`
 function in your child component:
 
 ```js
