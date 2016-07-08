@@ -67,6 +67,13 @@ export default GPT.extend({
 </script>
 ```
 
+## Troubleshooting
+
+1. Make sure your ad blocker isn't interfering.
+
+2. Add `googfc` as a query parameter to your url, this will activate an in-page
+debugging console. Eg, `http://localhost:4200/?googfc`.
+
 ## Docs
 
 * [GPT Boilerplate (annotated)](https://support.google.com/dfp_premium/answer/1638622?hl=en&ref_topic=4389931)
