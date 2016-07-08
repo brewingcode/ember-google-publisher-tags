@@ -48,7 +48,9 @@ export default GPT.extend({
 
 1. `ember install ember-google-publisher-tags`
 
-2. Add the following initialization boilerplate to your `<head>`:
+2. If you do not use Ember's default `index.html` file (which has the
+`{{content-for "head-footer"}}` binding), add the following initialization
+boilerplate to your `<head>`:
 
 ```js
 <script type='text/javascript'>
