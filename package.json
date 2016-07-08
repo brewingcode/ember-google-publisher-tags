@@ -1,7 +1,7 @@
 {
   "name": "ember-google-publisher-tags",
   "version": "0.0.1",
-  "description": "Ember component to show ads via Google Publisher Tags",
+  "description": "An Ember component to show ads via Google Publisher Tags",
   "directories": {
     "doc": "doc",
     "test": "tests"
