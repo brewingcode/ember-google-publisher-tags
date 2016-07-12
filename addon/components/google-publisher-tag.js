@@ -27,6 +27,7 @@ export default Component.extend({
 
     placement: 0,
     refresh: 0,
+    refreshCount: 0,
     tracing: false,
 
     didInitAttrs() {
@@ -61,6 +62,7 @@ export default Component.extend({
     addTargeting(slot) { // jshint ignore:line
         // override this in child components, if needed, but an example is:
         // slot.setTargeting('placement', get(this, 'placement'));
+        // slot.setTargeting('refresh_count', get(this, 'refreshCount'));
         // slot.setTargeting('planet', 'Earth');
     },
     waitForRefresh() {
@@ -82,6 +84,7 @@ export default Component.extend({
         let googletag = window.googletag;
         googletag.cmd.push( () => {
             this.trace('refreshing now');
+            this.incrementProperty('refreshCount');
             let slot = get(this, 'slot');
             this.addTargeting(slot);
             googletag.pubads().refresh([slot]);

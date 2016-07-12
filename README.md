@@ -14,10 +14,13 @@ sample ad on Google's ad network.
 
 Optional properties:
 
-* `refresh=N`: Refresh the ad after `N` seconds.
+* `refresh=N`: Refresh the ad after `N` seconds. Each refresh also increments
+the `refreshCount` property, which might be useful.
+
 * `placement=N`: Differentiate ads that use the same `adId` on a single page.
 For example, one ad might be `placement="upper right"`, while another might be
 `placement="lower left"`.
+
 * `tracing=true`: Turn on `Ember.Logger.log` tracing.
 
 Additionally, if you want to use GPT's `setTargeting` function to serve targeted
@@ -33,6 +36,7 @@ export default GPT.extend({
 
     addTargeting(slot) {
         slot.setTargeting('placement', this.get('placement'));
+        slot.setTargeting('refresh_count', this.get('refreshCount'));
         slot.setTargeting('age', '100');
         // ... more targeting, if desired
     }
