@@ -37,7 +37,7 @@ export default Component.extend({
 
         // width and height are also passed into .defineSlot(), which will
         // silently fail unless they are actually numbers
-        assert(`google-publisher-tag "${adId} (${placement})k": width and height must be numbers`, typeof width === 'number' && typeof height === 'number');
+        assert(`google-publisher-tag "${adId} (${placement})": width and height must be numbers`, typeof width === 'number' && typeof height === 'number');
 
         let style = `width:${width}px; height:${height}px;`;
         set(this, 'style', htmlSafe(style));
