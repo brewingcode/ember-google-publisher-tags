@@ -30,7 +30,7 @@ export default Component.extend({
     refreshCount: 0,
     tracing: false,
 
-    didInitAttrs() {
+    didReceiveAttrs() {
         this._super(...arguments);
 
         let {adId, width, height, placement} = getProperties(this, 'adId', 'width', 'height', 'placement');
