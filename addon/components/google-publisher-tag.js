@@ -47,16 +47,18 @@ export default Component.extend({
 
         let googletag = window.googletag;
         let {adId, width, height, elementId} = getProperties(this, 'adId', 'width', 'height', 'elementId');
-        googletag.cmd.push( () => {
-            this.trace(`defining slot ${adId} for div ${elementId}`);
-            let slot = googletag.defineSlot(adId, [width, height], elementId)
-                .addService(googletag.pubads());
-            this.addTargeting(slot);
-            googletag.enableServices();
-            googletag.display(elementId);
-            set(this, 'slot', slot);
-            this.waitForRefresh();
-        });
+        if (adId && width && height && elementId) {
+            googletag.cmd.push( () => {
+                this.trace(`defining slot ${adId} for div ${elementId} at size ${width}x${height}`);
+                let slot = googletag.defineSlot(adId, [width, height], elementId)
+                    .addService(googletag.pubads());
+                this.addTargeting(slot);
+                googletag.enableServices();
+                googletag.display(elementId);
+                set(this, 'slot', slot);
+                this.waitForRefresh();
+            });
+        }
     },
 
     addTargeting(slot) { // jshint ignore:line
