@@ -85,3 +85,4 @@ debugging console. Eg, `http://localhost:4200/?googfc`.
 * [GPT Boilerplate (annotated)](https://support.google.com/dfp_premium/answer/1638622?hl=en&ref_topic=4389931)
 * [GPT Reference](https://developers.google.com/doubleclick-gpt/reference)
 * [Ad Sizes](https://support.google.com/adsense/answer/185666)
+* [Common Mistakes](https://developers.google.com/doubleclick-gpt/common_implementation_mistakes)
