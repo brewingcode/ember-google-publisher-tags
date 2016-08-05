@@ -5,10 +5,11 @@ export default Ember.Service.extend({
     init() {
         this._super(...arguments);
         this.set('queue', []);
+        this.get('loadGPT').perform(0);
     },
 
     push(component) {
-        this.trace(`adding: ${component.get('adId')}`, component);
+        this.trace(`adding: ${component.get('adId')}`);
 
         this.get('queue').pushObject(component.get('elementId'));
 
@@ -26,38 +27,34 @@ export default Ember.Service.extend({
             }
         });
 
-        this.get('loadGPT').perform();
+        this.get('displayAll').perform(1000);
     },
 
-    loadGPT: task(function * () {
-        yield timeout(1000);
+    loadGPT: task(function * (delay) {
+        yield timeout(delay);
 
         let googletag = window.googletag;
         googletag.cmd.push( () => {
             try {
-                let b = googletag.pubads().enableSingleRequest();
-                this.trace(`enableSingleRequest: ${b}`);
-
-                b = googletag.enableServices();
-                this.trace(`enableServices: ${b}`);
+                this.trace('enableSingleRequest: ', googletag.pubads().enableSingleRequest());
+                this.trace('enableServices: ', googletag.enableServices());
             }
             catch (e) {
                 Ember.Logger.error('gpt exception: ', e);
             }
         });
+    }).restartable(),
+
+    displayAll: task(function * (delay) {
+        yield timeout(delay);
 
         let divIds = this.get('queue');
         this.set('queue', []);
-        this.get('displayAll').perform(divIds);
-    }).restartable(),
-
-    displayAll: task(function * (ids) {
-        yield timeout(2000);
 
         let googletag = window.googletag;
         googletag.cmd.push( () => {
             try {
-                ids.forEach( (id) => {
+                divIds.forEach( (id) => {
                     this.trace(`display: ${id}`);
                     googletag.display(id);
                 });
@@ -66,7 +63,7 @@ export default Ember.Service.extend({
                 Ember.Logger.error('gpt exception: ', e);
             }
         });
-    }),
+    }).restartable(),
 
     trace() {
         if (1) {
