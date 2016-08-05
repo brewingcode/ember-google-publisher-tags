@@ -18,7 +18,8 @@ import {task, timeout} from 'ember-concurrency';
 const {
     assert, get, set, getProperties, Component,
     String: { htmlSafe },
-    Logger: { log }
+    Logger: { log },
+    inject: { service }
 } = Ember;
 
 export default Component.extend({
@@ -29,6 +30,7 @@ export default Component.extend({
     refresh: 0,
     refreshCount: 0,
     tracing: false,
+    adQueue: service(),
 
     didReceiveAttrs() {
         this._super(...arguments);
@@ -45,20 +47,7 @@ export default Component.extend({
     didInsertElement() {
         this._super(...arguments);
 
-        let googletag = window.googletag;
-        let {adId, width, height, elementId} = getProperties(this, 'adId', 'width', 'height', 'elementId');
-        if (adId && width && height && elementId) {
-            googletag.cmd.push( () => {
-                this.trace(`defining slot ${adId} for div ${elementId} at size ${width}x${height}`);
-                let slot = googletag.defineSlot(adId, [width, height], elementId)
-                    .addService(googletag.pubads());
-                this.addTargeting(slot);
-                googletag.enableServices();
-                googletag.display(elementId);
-                set(this, 'slot', slot);
-                this.waitForRefresh();
-            });
-        }
+        get(this, 'adQueue').push(this);
     },
 
     addTargeting(slot) { // jshint ignore:line
@@ -82,12 +71,14 @@ export default Component.extend({
     },
 
     doRefresh: task(function * (duration) {
+        this.incrementProperty('refreshCount');
+
         yield timeout(duration * 1000);
+
         let googletag = window.googletag;
         googletag.cmd.push( () => {
-            this.trace('refreshing now');
-            this.incrementProperty('refreshCount');
             let slot = get(this, 'slot');
+            this.trace('refreshing now');
             this.addTargeting(slot);
             googletag.pubads().refresh([slot]);
             this.waitForRefresh();
