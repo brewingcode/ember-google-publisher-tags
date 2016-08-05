@@ -48,6 +48,7 @@ export default Component.extend({
         this._super(...arguments);
 
         get(this, 'adQueue').push(this);
+        this.waitForRefresh();
     },
 
     addTargeting(slot) { // jshint ignore:line
