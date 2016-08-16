@@ -2,16 +2,16 @@ import Ember from 'ember';
 import {task, timeout} from 'ember-concurrency';
 
 const {
-  A: newArray
+  A: newArray,
+  on
 } = Ember;
 
 export default Ember.Service.extend({
     queue: newArray(),
 
-    init() {
-        this._super(...arguments);
+    onInit: on('init', function() {
         this.get('loadGPT').perform(0);
-    },
+    }),
 
     push(component) {
         this.trace(`adding: ${component.get('adId')}`);
