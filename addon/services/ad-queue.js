@@ -6,9 +6,10 @@ const {
 } = Ember;
 
 export default Ember.Service.extend({
+    queue: newArray(),
+
     init() {
         this._super(...arguments);
-        this.set('queue', newArray());
         this.get('loadGPT').perform(0);
     },
 
@@ -52,8 +53,9 @@ export default Ember.Service.extend({
     displayAll: task(function * (delay) {
         yield timeout(delay);
 
-        let divIds = this.get('queue');
-        this.set('queue', []);
+        let queue = this.get('queue');
+        let divIds = queue.toArray();
+        queue.clear();
 
         let googletag = window.googletag;
         googletag.cmd.push( () => {
