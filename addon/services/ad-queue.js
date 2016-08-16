@@ -1,10 +1,14 @@
 import Ember from 'ember';
 import {task, timeout} from 'ember-concurrency';
 
+const {
+  A: newArray
+} = Ember;
+
 export default Ember.Service.extend({
     init() {
         this._super(...arguments);
-        this.set('queue', []);
+        this.set('queue', newArray());
         this.get('loadGPT').perform(0);
     },
 
