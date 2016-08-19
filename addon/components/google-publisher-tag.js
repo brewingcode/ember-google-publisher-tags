@@ -10,27 +10,34 @@
 //      page, use this to distinguish between them: call one "1" and the other
 //      "2", or call them "top-left" and "bottom-right", etc
 //    - refresh: number of seconds between refreshes
+//    - shouldWatchViewport: turn off checks for ad in view
 //    - tracing: verbose messages in console.log via Ember.Logger.log
 
 import Ember from 'ember';
 import {task, timeout} from 'ember-concurrency';
+import InViewportMixin from 'ember-in-viewport';
 
 const {
-    assert, get, set, getProperties, Component,
+    Component,
+    assert,
+    get, set, getProperties, setProperties,
     String: { htmlSafe },
     Logger: { log },
-    inject: { service }
+    inject: { service },
+    run: { scheduleOnce }
 } = Ember;
 
-export default Component.extend({
+export default Component.extend(InViewportMixin, {
     classNames: ['google-publisher-tag'],
     attributeBindings: ['style'],
+
+    adQueue: service(),
 
     placement: 0,
     refresh: 0,
     refreshCount: 0,
     tracing: false,
-    adQueue: service(),
+    shouldWatchViewport: true,
 
     didReceiveAttrs() {
         this._super(...arguments);
@@ -47,8 +54,39 @@ export default Component.extend({
     didInsertElement() {
         this._super(...arguments);
 
-        get(this, 'adQueue').push(this);
-        this.waitForRefresh();
+        let {
+          shouldWatchViewport,
+          viewportEntered
+        } = getProperties(this,
+          'shouldWatchViewport',
+          'viewportEntered'
+        );
+
+        let options = {};
+        if (shouldWatchViewport) {
+          options.viewportSpy = true;
+        } else {
+          options.viewportRefreshRate = 0;
+        }
+        setProperties(this, options);
+
+        scheduleOnce('afterRender', () => {
+          if (!shouldWatchViewport || viewportEntered) {
+            this.initAd();
+          } else {
+            this.trace('ad hidden on load, not initialized');
+          }
+        });
+    },
+
+    initAd() {
+      get(this, 'adQueue').push(this);
+
+      this.trace('ad initialized');
+
+      set(this, 'isAdInitialized', true);
+
+      this.waitForRefresh();
     },
 
     addTargeting(slot) { // jshint ignore:line
@@ -61,7 +99,7 @@ export default Component.extend({
         let duration = get(this, 'refresh');
         if (duration > 0) {
             this.trace(`will refresh in ${duration} seconds`);
-            get(this, 'doRefresh').perform(duration);
+            get(this, 'refreshWaitTask').perform(duration);
         }
     },
     trace() {
@@ -71,11 +109,29 @@ export default Component.extend({
         }
     },
 
-    doRefresh: task(function * (duration) {
+    refreshWaitTask: task(function * (duration) {
         this.incrementProperty('refreshCount');
 
         yield timeout(duration * 1000);
 
+        let {
+          shouldWatchViewport,
+          viewportEntered
+        } = getProperties(this,
+          'shouldWatchViewport',
+          'viewportEntered'
+        );
+
+        if (shouldWatchViewport && !viewportEntered) {
+          this.trace('ad not in view, skipped refresh');
+
+          return set(this, 'isRefreshOverdue', true);
+        }
+
+        this.doRefresh();
+    }).restartable(),
+
+    doRefresh() {
         let googletag = window.googletag;
         googletag.cmd.push( () => {
             let slot = get(this, 'slot');
@@ -84,5 +140,21 @@ export default Component.extend({
             googletag.pubads().refresh([slot]);
             this.waitForRefresh();
         });
-    }).restartable()
+    },
+
+    didEnterViewport() {
+      this.trace('entered viewport');
+
+      let isAdInitialized = get(this, 'isAdInitialized');
+      if (!isAdInitialized) {
+        this.initAd();
+      } else {
+        let isRefreshOverdue = get(this, 'isRefreshOverdue');
+        if (isRefreshOverdue) {
+          this.doRefresh();
+
+          set(this, 'isRefreshOverdue', false);
+        }
+      }
+    }
 });

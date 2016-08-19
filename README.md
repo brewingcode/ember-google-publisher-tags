@@ -17,6 +17,9 @@ Optional properties:
 * `refresh=N`: Refresh the ad after `N` seconds. Each refresh also increments
 the `refreshCount` property, which might be useful.
 
+* `shouldWatchViewport=false`: Turn off checks for ad in view, if using tons of
+ads slows down your page.
+
 * `placement=N`: Differentiate ads that use the same `adId` on a single page.
 For example, one ad might be `placement="upper right"`, while another might be
 `placement="lower left"`.
