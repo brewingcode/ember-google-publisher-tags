@@ -72,7 +72,7 @@ export default Ember.Service.extend({
     }).restartable(),
 
     trace() {
-        if (1) {
+        if (0) {
             Ember.Logger.log(...arguments);
         }
     }
