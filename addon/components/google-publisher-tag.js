@@ -24,6 +24,7 @@ const {
     String: { htmlSafe },
     Logger: { log },
     inject: { service },
+    run,
     run: { scheduleOnce }
 } = Ember;
 
@@ -99,7 +100,13 @@ export default Component.extend(InViewportMixin, {
         let duration = get(this, 'refresh');
         if (duration > 0) {
             this.trace(`will refresh in ${duration} seconds`);
-            get(this, 'refreshWaitTask').perform(duration);
+
+            // give the tests a moment to release wait handlers
+            setTimeout(() => {
+              run(() => {
+                get(this, 'refreshWaitTask').perform(duration);
+              });
+            });
         }
     },
     trace() {
