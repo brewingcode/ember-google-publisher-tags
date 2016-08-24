@@ -1,4 +1,5 @@
 # ember-google-publisher-tags
+[![npm version](https://badge.fury.io/js/ember-google-publisher-tags.svg)](https://badge.fury.io/js/ember-google-publisher-tags)
 
 An Ember component for adding [GPT](https://support.google.com/dfp_sb/answer/1649768?hl=en)
 ads to your site.
