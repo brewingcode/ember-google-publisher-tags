@@ -2,4 +2,22 @@
 
 <h3>Here is your sample ad:</h3>
 
-{{google-publisher-tag adId="/6355419/Travel/Europe/France/Paris" width=300 height=250}}
+{{google-publisher-tag
+  adId="/6355419/Travel/Europe/France/Paris"
+  width=300
+  height=250
+  refresh=3
+  shouldWatchViewport=false
+}}
+
+<h3>Scroll down for another sample ad:</h3>
+
+<div style="margin-top: 1000px;">
+  {{google-publisher-tag
+    tracing=1
+    adId="/6355419/Travel/Europe/France/Paris"
+    width=300
+    height=250
+    refresh=3
+  }}
+</div>
