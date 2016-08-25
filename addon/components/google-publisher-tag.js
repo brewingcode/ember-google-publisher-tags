@@ -63,13 +63,10 @@ export default Component.extend(InViewportMixin, {
           'viewportEntered'
         );
 
-        let options = {};
-        if (shouldWatchViewport) {
-          options.viewportSpy = true;
-        } else {
-          options.viewportRefreshRate = 0;
-        }
-        setProperties(this, options);
+        setProperties(this, {
+          viewportEnabled: shouldWatchViewport,
+          viewportSpy: true
+        });
 
         scheduleOnce('afterRender', () => {
           if (!shouldWatchViewport || viewportEntered) {
