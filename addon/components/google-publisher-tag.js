@@ -16,6 +16,7 @@
 import Ember from 'ember';
 import {task, timeout} from 'ember-concurrency';
 import InViewportMixin from 'ember-in-viewport';
+import getViewportTolerance from '../utils/get-viewport-tolerance';
 
 const {
     Component,
@@ -57,15 +58,20 @@ export default Component.extend(InViewportMixin, {
 
         let {
           shouldWatchViewport,
-          viewportEntered
+          viewportEntered,
+          width,
+          height
         } = getProperties(this,
           'shouldWatchViewport',
-          'viewportEntered'
+          'viewportEntered',
+          'width',
+          'height'
         );
 
         setProperties(this, {
           viewportEnabled: shouldWatchViewport,
-          viewportSpy: true
+          viewportSpy: true,
+          viewportTolerance: getViewportTolerance(width, height, 0.5)
         });
 
         scheduleOnce('afterRender', () => {
