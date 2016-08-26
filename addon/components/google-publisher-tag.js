@@ -84,12 +84,11 @@ export default Component.extend(InViewportMixin, {
     },
 
     initAd() {
-      get(this, 'adQueue').push(this);
-
-      this.trace('ad initialized');
-
-      set(this, 'isAdInitialized', true);
-
+      if (!get(this, 'isAdInitialized')) {
+        this.trace('initializing');
+        get(this, 'adQueue').push(this);
+        set(this, 'isAdInitialized', true);
+      }
       this.waitForRefresh();
     },
 
@@ -155,16 +154,10 @@ export default Component.extend(InViewportMixin, {
     didEnterViewport() {
       this.trace('entered viewport');
 
-      let isAdInitialized = get(this, 'isAdInitialized');
-      if (!isAdInitialized) {
-        this.initAd();
-      } else {
-        let isRefreshOverdue = get(this, 'isRefreshOverdue');
-        if (isRefreshOverdue) {
-          this.doRefresh();
-
-          set(this, 'isRefreshOverdue', false);
-        }
+      this.initAd();
+      if (get(this, 'isRefreshOverdue')) {
+        this.doRefresh();
+        set(this, 'isRefreshOverdue', false);
       }
     }
 });
