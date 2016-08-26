@@ -8,12 +8,17 @@ const {
 
 export default Ember.Service.extend({
     queue: newArray(),
+    tracing: false,
 
     onInit: on('init', function() {
         this.get('loadGPT').perform(0);
     }),
 
     push(component) {
+        if (component.get('tracing')) {
+            this.set('tracing', true);
+        }
+
         this.trace(`adding: ${component.get('adId')}`);
 
         this.get('queue').pushObject(component.get('elementId'));
@@ -72,7 +77,7 @@ export default Ember.Service.extend({
     }).restartable(),
 
     trace() {
-        if (0) {
+        if (this.get('tracing')) {
             Ember.Logger.log(...arguments);
         }
     }
