@@ -45,7 +45,7 @@
   "dependencies": {
     "ember-cli-babel": "^5.1.6",
     "ember-concurrency": "^0.7.8",
-    "ember-in-viewport": "kellyselden/ember-in-viewport#allow-disabled"
+    "ember-in-viewport": "DockYard/ember-in-viewport#master"
   },
   "ember-addon": {
     "configPath": "tests/dummy/config"
