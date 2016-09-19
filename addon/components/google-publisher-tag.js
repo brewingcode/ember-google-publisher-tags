@@ -144,7 +144,7 @@ export default Component.extend(InViewportMixin, {
     doRefresh() {
         let {refreshLimit, refreshCount} = getProperties(this, 'refreshLimit', 'refreshCount');
         if (refreshLimit > 0 && refreshCount >= refreshLimit) {
-          this.trace(`refreshCount has exceeded refreshLimit: ${refreshLimit}`);
+          this.trace(`refreshCount has met refreshLimit: ${refreshLimit}`);
           return;
         }
 
