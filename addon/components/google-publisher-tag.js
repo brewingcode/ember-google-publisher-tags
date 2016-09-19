@@ -120,8 +120,6 @@ export default Component.extend(InViewportMixin, {
     },
 
     refreshWaitTask: task(function * (duration) {
-        this.incrementProperty('refreshCount');
-
         yield timeout(duration * 1000);
 
         let {
@@ -163,6 +161,7 @@ export default Component.extend(InViewportMixin, {
           this.trace('refreshing now');
           this.addTargeting(slot);
           googletag.pubads().refresh([slot]);
+          this.incrementProperty('refreshCount');
           this.waitForRefresh();
         });
     },
