@@ -57,12 +57,10 @@ export default Component.extend(InViewportMixin, {
     didInsertElement() {
         let {
           shouldWatchViewport,
-          viewportEntered,
           width,
           height
         } = getProperties(this,
           'shouldWatchViewport',
-          'viewportEntered',
           'width',
           'height'
         );
@@ -73,17 +71,17 @@ export default Component.extend(InViewportMixin, {
           viewportTolerance: getViewportTolerance(width, height, 0.5)
         });
 
-        scheduleOnce('afterRender', () => {
-          if (!shouldWatchViewport || viewportEntered) {
-            this.initAd();
-          } else {
-            this.trace('ad hidden on load, not initialized');
-          }
-        });
-
         // we must set the properties above first before calling super
         // where the mixin consumes the properties
         this._super(...arguments);
+
+        if (!shouldWatchViewport) {
+          scheduleOnce('afterRender', () => {
+            this.initAd();
+          });
+        } else {
+          this.trace('watching viewport, waiting for event...');
+        }
     },
 
     initAd() {
@@ -117,7 +115,7 @@ export default Component.extend(InViewportMixin, {
     trace() {
         if (get(this, 'tracing')) {
             let {adId, placement} = getProperties(this, 'adId', 'placement');
-            log(`${adId} (${placement}): `, ...arguments);
+            log(`${adId} (${placement}):`, ...arguments);
         }
     },
 
