@@ -26,6 +26,8 @@ ads slows down your page.
 For example, one ad might be `placement="upper right"`, while another might be
 `placement="lower left"`.
 
+* `refreshLimit=N` Limit refreshing to `N` times. For example, setting to 5 would stop refreshing after the 5th time.
+
 * `tracing=true`: Turn on `Ember.Logger.log` tracing.
 
 Additionally, if you want to use GPT's `setTargeting` function to serve targeted
