@@ -102,8 +102,6 @@ export default Component.extend(InViewportMixin, {
     waitForRefresh() {
         let duration = get(this, 'refresh');
         if (duration > 0) {
-            this.trace(`will refresh in ${duration} seconds`);
-
             // give the tests a moment to release wait handlers
             setTimeout(() => {
               run(() => {
@@ -120,6 +118,8 @@ export default Component.extend(InViewportMixin, {
     },
 
     refreshWaitTask: task(function * (duration) {
+        this.trace(`will refresh in ${duration} seconds`);
+
         yield timeout(duration * 1000);
 
         let {
@@ -137,7 +137,7 @@ export default Component.extend(InViewportMixin, {
         }
 
         this.doRefresh();
-    }).restartable(),
+    }).drop(), // don't reset the timer if you scroll out and back in view before it finishes
 
     doRefresh() {
         let {refreshLimit, refreshCount} = getProperties(this, 'refreshLimit', 'refreshCount');
