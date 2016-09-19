@@ -140,21 +140,13 @@ export default Component.extend(InViewportMixin, {
     }).restartable(),
 
     doRefresh() {
-
-        let refreshLimit   = get(this, 'refreshLimit');
-        let refreshCount   = get(this, 'refreshCount');
-        let isWithinLimits = refreshLimit >= get(this, 'refreshCount');
-        let canRefresh     = this.isRefreshLimited() && isWithinLimits;
-        let debugMsg       = `refresh called ${refreshCount} of ${refreshLimit} times`;
-
-        if (!canRefresh) {
-          return this.trace('Could not refresh :: ', debugMsg);
+        let {refreshLimit, refreshCount} = getProperties(this, 'refreshLimit', 'refreshCount');
+        if (refreshLimit > 0 && refreshCount >= refreshLimit) {
+          this.trace(`refreshCount has exceeded refreshLimit: ${refreshLimit}`);
+          return;
         }
 
-        if (this.isRefreshLimited()) {
-          this.trace(debugMsg);
-        }
-
+        this.trace(`queuing a refresh: ${refreshCount}`);
         let googletag = window.googletag;
         googletag.cmd.push( () => {
           let slot = get(this, 'slot');
@@ -164,10 +156,6 @@ export default Component.extend(InViewportMixin, {
           this.incrementProperty('refreshCount');
           this.waitForRefresh();
         });
-    },
-
-    isRefreshLimited() {
-      return get(this, 'refreshLimit') !== false;
     },
 
     didEnterViewport() {
