@@ -55,8 +55,6 @@ export default Component.extend(InViewportMixin, {
         set(this, 'style', htmlSafe(style));
     },
     didInsertElement() {
-        this._super(...arguments);
-
         let {
           shouldWatchViewport,
           viewportEntered,
@@ -82,6 +80,10 @@ export default Component.extend(InViewportMixin, {
             this.trace('ad hidden on load, not initialized');
           }
         });
+
+        // we must set the properties above first before calling super
+        // where the mixin consumes the properties
+        this._super(...arguments);
     },
 
     initAd() {
