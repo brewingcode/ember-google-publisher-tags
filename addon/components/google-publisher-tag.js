@@ -38,7 +38,7 @@ export default Component.extend(InViewportMixin, {
     placement: 0,
     refresh: 0,
     refreshCount: 0,
-    refreshLimit: false,
+    refreshLimit: 0,
     tracing: false,
     shouldWatchViewport: true,
 
