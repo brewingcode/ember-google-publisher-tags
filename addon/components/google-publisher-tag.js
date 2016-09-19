@@ -141,32 +141,30 @@ export default Component.extend(InViewportMixin, {
         this.doRefresh();
     }).restartable(),
 
-    canRefresh() {
-      let isWithinLimits = get(this, 'refreshLimit') >= get(this, 'refreshCount');
-      return this.isRefreshLimited() && isWithinLimits;
-    },
-
     doRefresh() {
 
-        if (this.canRefresh()) {
+        let refreshLimit   = get(this, 'refreshLimit');
+        let refreshCount   = get(this, 'refreshCount');
+        let isWithinLimits = refreshLimit >= get(this, 'refreshCount');
+        let canRefresh     = this.isRefreshLimited() && isWithinLimits;
+        let debugMsg       = `refresh called ${refreshCount} of ${refreshLimit} times`;
 
-          // log helpful data when refresh is limited
-          if (this.isRefreshLimited()) {
-            this.trace(`refreshed ${get(this, 'refreshCount')} of ${get(this, 'refreshLimit')} times`);
-          }
-
-          let googletag = window.googletag;
-          googletag.cmd.push( () => {
-            let slot = get(this, 'slot');
-            this.trace('refreshing now');
-            this.addTargeting(slot);
-            googletag.pubads().refresh([slot]);
-            this.waitForRefresh();
-          });
-
-        } else {
-          this.trace('can not refresh slot');
+        if (!canRefresh) {
+          return this.trace('Could not refresh :: ', debugMsg);
         }
+
+        if (this.isRefreshLimited()) {
+          this.trace(debugMsg);
+        }
+
+        let googletag = window.googletag;
+        googletag.cmd.push( () => {
+          let slot = get(this, 'slot');
+          this.trace('refreshing now');
+          this.addTargeting(slot);
+          googletag.pubads().refresh([slot]);
+          this.waitForRefresh();
+        });
     },
 
     isRefreshLimited() {
@@ -175,6 +173,7 @@ export default Component.extend(InViewportMixin, {
 
     didEnterViewport() {
       this.trace('entered viewport');
+
       this.initAd();
       if (get(this, 'isRefreshOverdue')) {
         this.doRefresh();
