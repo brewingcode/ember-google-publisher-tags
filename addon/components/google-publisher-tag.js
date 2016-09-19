@@ -90,25 +90,32 @@ export default Component.extend(InViewportMixin, {
         get(this, 'adQueue').push(this);
         set(this, 'isAdInitialized', true);
       }
-      this.waitForRefresh();
+
+      let duration = get(this, 'refresh');
+      if (duration > 0) {
+        this.waitForRefresh();
+      }
     },
 
-    addTargeting(slot) { // jshint ignore:line
+    addTargeting(/* slot */) {
         // override this in child components, if needed, but an example is:
         // slot.setTargeting('placement', get(this, 'placement'));
         // slot.setTargeting('refresh_count', get(this, 'refreshCount'));
         // slot.setTargeting('planet', 'Earth');
     },
     waitForRefresh() {
-        let duration = get(this, 'refresh');
-        if (duration > 0) {
-            // give the tests a moment to release wait handlers
-            setTimeout(() => {
-              run(() => {
-                get(this, 'refreshWaitTask').perform(duration);
-              });
-            });
-        }
+      let {refreshLimit, refreshCount} = getProperties(this, 'refreshLimit', 'refreshCount');
+      if (refreshLimit > 0 && refreshCount >= refreshLimit) {
+        this.trace(`refreshCount has met refreshLimit: ${refreshLimit}`);
+        return;
+      }
+
+      // give the tests a moment to release wait handlers
+      setTimeout(() => {
+        run(() => {
+          get(this, 'refreshWaitTask').perform();
+        });
+      });
     },
     trace() {
         if (get(this, 'tracing')) {
@@ -117,7 +124,9 @@ export default Component.extend(InViewportMixin, {
         }
     },
 
-    refreshWaitTask: task(function * (duration) {
+    refreshWaitTask: task(function * () {
+        let duration = get(this, 'refresh');
+
         this.trace(`will refresh in ${duration} seconds`);
 
         yield timeout(duration * 1000);
@@ -140,22 +149,28 @@ export default Component.extend(InViewportMixin, {
     }).drop(), // don't reset the timer if you scroll out and back in view before it finishes
 
     doRefresh() {
-        let {refreshLimit, refreshCount} = getProperties(this, 'refreshLimit', 'refreshCount');
-        if (refreshLimit > 0 && refreshCount >= refreshLimit) {
-          this.trace(`refreshCount has met refreshLimit: ${refreshLimit}`);
-          return;
-        }
-
-        this.trace(`queuing a refresh: ${refreshCount}`);
         let googletag = window.googletag;
         googletag.cmd.push( () => {
+          this.incrementProperty('refreshCount');
+          this.traceRefresh();
+
           let slot = get(this, 'slot');
-          this.trace('refreshing now');
           this.addTargeting(slot);
           googletag.pubads().refresh([slot]);
-          this.incrementProperty('refreshCount');
+
           this.waitForRefresh();
         });
+    },
+
+    traceRefresh() {
+      let { refreshCount, refreshLimit } = getProperties(this, 'refreshCount', 'refreshLimit');
+
+      let text = `refreshing now: ${refreshCount}`;
+      if (refreshLimit > 0) {
+        text += ` of ${refreshLimit}`;
+      }
+
+      this.trace(text);
     },
 
     didEnterViewport() {
