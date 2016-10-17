@@ -12,6 +12,7 @@
 //    - refresh: number of seconds between refreshes
 //    - shouldWatchViewport: turn off checks for ad in view
 //    - tracing: verbose messages in console.log via Ember.Logger.log
+//    - backgroundRefresh: refresh ads when tabs in are backgrounded
 
 import Ember from 'ember';
 import {task, timeout} from 'ember-concurrency';
@@ -19,13 +20,10 @@ import InViewportMixin from 'ember-in-viewport';
 import getViewportTolerance from '../utils/get-viewport-tolerance';
 
 const {
-    Component,
-    assert,
-    get, set, getProperties, setProperties,
+    Component, assert, get, set, getProperties, setProperties, run,
     String: { htmlSafe },
     Logger: { log },
     inject: { service },
-    run,
     run: { scheduleOnce }
 } = Ember;
 
@@ -80,7 +78,19 @@ export default Component.extend(InViewportMixin, {
             this.initAd();
           });
         } else {
-          this.trace('watching viewport, waiting for event...');
+            // watch via this.didEnterViewport(), below
+            this.trace('watching viewport, waiting for event...');
+        }
+
+        if (!get(this, 'backgroundRefresh')) {
+            if (document && document.addEventListener) {
+                document.addEventListener('visibilitychange', () => {
+                    this.trace('visibilitychange: document.hidden: ', document.hidden);
+                    if (!document.hidden) {
+                        this.didEnterViewport();
+                    }
+                }, false);
+            }
         }
     },
 
@@ -132,17 +142,23 @@ export default Component.extend(InViewportMixin, {
         yield timeout(duration * 1000);
 
         let {
-          shouldWatchViewport,
-          viewportEntered
+            shouldWatchViewport,
+            viewportEntered
         } = getProperties(this,
-          'shouldWatchViewport',
-          'viewportEntered'
+            'shouldWatchViewport',
+            'viewportEntered'
         );
 
         if (shouldWatchViewport && !viewportEntered) {
-          this.trace('ad not in view, skipped refresh');
+            this.trace('ad not in view, delaying refresh');
+            set(this, 'isRefreshOverdue', true);
+            return;
+        }
 
-          return set(this, 'isRefreshOverdue', true);
+        if (!get(this, 'backgroundRefresh') && document.hidden) {
+            this.trace('ad is in background, delaying refresh');
+            set(this, 'isRefreshOverdue', true);
+            return;
         }
 
         this.doRefresh();

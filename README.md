@@ -30,6 +30,10 @@ For example, one ad might be `placement="upper right"`, while another might be
 
 * `tracing=true`: Turn on `Ember.Logger.log` tracing.
 
+* `backgroundRefresh`: By default, we do not refresh ads in backgrounded pages,
+  according to the `document.hidden` property. If, for some strange reason, you
+  want to refresh ads while nobody is looking, set this to false.
+
 Additionally, if you want to use GPT's `setTargeting` function to serve targeted
 ads, extend the `GooglePublisherTag` component and override the `addTargeting`
 function in your child component:
