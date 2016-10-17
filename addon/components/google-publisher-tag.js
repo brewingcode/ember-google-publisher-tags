@@ -54,19 +54,19 @@ export default Component.extend(InViewportMixin, {
     },
     didInsertElement() {
         let {
-          shouldWatchViewport,
-          width,
-          height
+            shouldWatchViewport,
+            width,
+            height
         } = getProperties(this,
-          'shouldWatchViewport',
-          'width',
-          'height'
+            'shouldWatchViewport',
+            'width',
+            'height'
         );
 
         setProperties(this, {
-          viewportEnabled: shouldWatchViewport,
-          viewportSpy: true,
-          viewportTolerance: getViewportTolerance(width, height, 0.5)
+            viewportEnabled: shouldWatchViewport,
+            viewportSpy: true,
+            viewportTolerance: getViewportTolerance(width, height, 0.5)
         });
 
         // we must set the properties above first before calling super
@@ -74,9 +74,9 @@ export default Component.extend(InViewportMixin, {
         this._super(...arguments);
 
         if (!shouldWatchViewport) {
-          scheduleOnce('afterRender', () => {
-            this.initAd();
-          });
+            scheduleOnce('afterRender', () => {
+                this.initAd();
+            });
         } else {
             // watch via this.didEnterViewport(), below
             this.trace('watching viewport, waiting for event...');
@@ -95,16 +95,16 @@ export default Component.extend(InViewportMixin, {
     },
 
     initAd() {
-      if (!get(this, 'isAdInitialized')) {
-        this.trace('initializing');
-        get(this, 'adQueue').push(this);
-        set(this, 'isAdInitialized', true);
-      }
+        if (!get(this, 'isAdInitialized')) {
+            this.trace('initializing');
+            get(this, 'adQueue').push(this);
+            set(this, 'isAdInitialized', true);
+        }
 
-      let duration = get(this, 'refresh');
-      if (duration > 0) {
-        this.waitForRefresh();
-      }
+        let duration = get(this, 'refresh');
+            if (duration > 0) {
+            this.waitForRefresh();
+        }
     },
 
     addTargeting(/* slot */) {
@@ -114,18 +114,18 @@ export default Component.extend(InViewportMixin, {
         // slot.setTargeting('planet', 'Earth');
     },
     waitForRefresh() {
-      let {refreshLimit, refreshCount} = getProperties(this, 'refreshLimit', 'refreshCount');
-      if (refreshLimit > 0 && refreshCount >= refreshLimit) {
-        this.trace(`refreshCount has met refreshLimit: ${refreshLimit}`);
-        return;
-      }
+        let {refreshLimit, refreshCount} = getProperties(this, 'refreshLimit', 'refreshCount');
+        if (refreshLimit > 0 && refreshCount >= refreshLimit) {
+            this.trace(`refreshCount has met refreshLimit: ${refreshLimit}`);
+          return;
+        }
 
-      // give the tests a moment to release wait handlers
-      setTimeout(() => {
-        run(() => {
-          get(this, 'refreshWaitTask').perform();
+        // give the tests a moment to release wait handlers
+        setTimeout(() => {
+            run(() => {
+                get(this, 'refreshWaitTask').perform();
+            });
         });
-      });
     },
     trace() {
         if (get(this, 'tracing')) {
@@ -167,35 +167,35 @@ export default Component.extend(InViewportMixin, {
     doRefresh() {
         let googletag = window.googletag;
         googletag.cmd.push( () => {
-          this.incrementProperty('refreshCount');
-          this.traceRefresh();
+            this.incrementProperty('refreshCount');
+            this.traceRefresh();
 
-          let slot = get(this, 'slot');
-          this.addTargeting(slot);
-          googletag.pubads().refresh([slot]);
+            let slot = get(this, 'slot');
+            this.addTargeting(slot);
+            googletag.pubads().refresh([slot]);
 
-          this.waitForRefresh();
+            this.waitForRefresh();
         });
     },
 
     traceRefresh() {
-      let { refreshCount, refreshLimit } = getProperties(this, 'refreshCount', 'refreshLimit');
+        let { refreshCount, refreshLimit } = getProperties(this, 'refreshCount', 'refreshLimit');
 
-      let text = `refreshing now: ${refreshCount}`;
-      if (refreshLimit > 0) {
-        text += ` of ${refreshLimit}`;
-      }
+        let text = `refreshing now: ${refreshCount}`;
+        if (refreshLimit > 0) {
+            text += ` of ${refreshLimit}`;
+        }
 
-      this.trace(text);
+        this.trace(text);
     },
 
     didEnterViewport() {
-      this.trace('entered viewport');
+        this.trace('entered viewport');
 
-      this.initAd();
-      if (get(this, 'isRefreshOverdue')) {
-        this.doRefresh();
-        set(this, 'isRefreshOverdue', false);
-      }
+        this.initAd();
+        if (get(this, 'isRefreshOverdue')) {
+            this.doRefresh();
+            set(this, 'isRefreshOverdue', false);
+        }
     }
 });
