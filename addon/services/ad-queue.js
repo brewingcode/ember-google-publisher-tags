@@ -28,7 +28,12 @@ export default Ember.Service.extend({
             try {
                 let {adId, width, height, elementId} = component.getProperties('adId', 'width', 'height', 'elementId');
                 this.trace(`defining slot: ${adId} @ ${width}x${height} in ${elementId}`);
-                let slot = googletag.defineSlot(adId, [width, height], elementId).addService(googletag.pubads());
+                let slot = googletag.defineSlot(adId, [width, height], elementId)
+                    .setSafeFrameConfig({
+                        sandbox: true,
+                        allowOverlayExpansion: false
+                    })
+                    .addService(googletag.pubads());
                 component.set('slot', slot);
                 component.addTargeting(slot);
             }
