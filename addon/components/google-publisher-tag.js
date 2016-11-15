@@ -181,18 +181,11 @@ export default Component.extend(InViewportMixin, {
 
     traceRefresh() {
         let { refreshCount, refreshLimit } = getProperties(this, 'refreshCount', 'refreshLimit');
-
-        let text = `refreshing now: ${refreshCount}`;
-        if (refreshLimit > 0) {
-            text += ` of ${refreshLimit}`;
-        }
-
-        this.trace(text);
+        this.trace(`refreshing now: ${refreshCount} of ${refreshLimit}`);
     },
 
     didEnterViewport() {
         this.trace('entered viewport');
-
         this.initAd();
         if (get(this, 'isRefreshOverdue')) {
             this.doRefresh();
