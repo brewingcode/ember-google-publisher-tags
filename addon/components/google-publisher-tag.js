@@ -84,7 +84,12 @@ export default Component.extend(InViewportMixin, {
                 document.addEventListener('visibilitychange', () => {
                     this.trace('visibilitychange: document.hidden: ', document.hidden);
                     if (!document.hidden) {
-                        this.didEnterViewport();
+                        if (shouldWatchViewport) {
+                            this.trace('visibilitychange: watching viewport instead, skipping init');
+                        }
+                        else {
+                            this.initAd();
+                        }
                     }
                 }, false);
             }
