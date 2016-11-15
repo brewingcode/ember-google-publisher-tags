@@ -23,15 +23,12 @@ const {
     Component, assert, get, set, getProperties, setProperties, run,
     String: { htmlSafe },
     Logger: { log },
-    inject: { service },
     run: { scheduleOnce }
 } = Ember;
 
 export default Component.extend(InViewportMixin, {
     classNames: ['google-publisher-tag'],
     attributeBindings: ['style'],
-
-    adQueue: service(),
 
     placement: 0,
     refresh: 0,
@@ -97,7 +94,6 @@ export default Component.extend(InViewportMixin, {
     initAd() {
         if (!get(this, 'isAdInitialized')) {
             this.trace('initializing');
-            get(this, 'adQueue').push(this);
             set(this, 'isAdInitialized', true);
         }
 
