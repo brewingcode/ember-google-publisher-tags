@@ -10,32 +10,36 @@
 //      page, use this to distinguish between them: call one "1" and the other
 //      "2", or call them "top-left" and "bottom-right", etc
 //    - refresh: number of seconds between refreshes
-//    - shouldWatchViewport: turn off checks for ad in view
+//    - refreshLimit: number of times to refresh, after which no more refreshes
+//      happen (0 is no limit)
 //    - tracing: verbose messages in console.log via Ember.Logger.log
+//    - shouldWatchViewport: do not refresh ads outside the viewport
 //    - backgroundRefresh: refresh ads when tabs in are backgrounded
+//    - iframeSrc: url for the iframe to use (see tests/dummy/public/ad-iframe.html)
 
 import Ember from 'ember';
-import {task, timeout} from 'ember-concurrency';
 import InViewportMixin from 'ember-in-viewport';
 import getViewportTolerance from '../utils/get-viewport-tolerance';
 
 const {
-    Component, assert, get, set, getProperties, setProperties, run,
+    Component, assert, get, set, getProperties, setProperties, observer,
     String: { htmlSafe },
     Logger: { log },
-    run: { scheduleOnce }
+    run: { later },
 } = Ember;
 
 export default Component.extend(InViewportMixin, {
     classNames: ['google-publisher-tag'],
     attributeBindings: ['style'],
+    refreshCount: 0,
 
     placement: 0,
     refresh: 0,
-    refreshCount: 0,
     refreshLimit: 0,
     tracing: false,
     shouldWatchViewport: true,
+    backgroundRefresh: false,
+    iframeSrc: '/ad-iframe.html',
 
     didReceiveAttrs() {
         this._super(...arguments);
@@ -100,10 +104,49 @@ export default Component.extend(InViewportMixin, {
         set(this, 'isRefreshDue', true);
     },
 
-        let duration = get(this, 'refresh');
-            if (duration > 0) {
+    // This is the meat of this component: any time one of these 3 properties is .set(), we need
+    // to check if a refresh should be triggered. A refresh is triggered ONLY if all 3 properties
+    // are true.
+    triggerRefresh: observer('inViewport', 'isRefreshDue', 'inForeground', function() {
+        let count = 0;
+        ['inViewport', 'isRefreshDue', 'inForeground'].forEach( prop => {
+            if (get(this, prop)) {
+                count++;
+            }
+        });
+        if (count === 3) {
+            this.incrementProperty('refreshCount');
+            let { refreshCount, refreshLimit } = getProperties(this, 'refreshCount', 'refreshLimit');
+            this.trace(`refreshing now: ${refreshCount} of ${refreshLimit}`);
+            this.initAd();
             this.waitForRefresh();
         }
+        else {
+            this.trace(`skipping refresh with count ${count}`);
+        }
+    }),
+
+    initAd() {
+        let { iframeSrc, elementId } = getProperties(this, 'iframeSrc', 'elementId');
+        this.$().append(`<iframe style="display:none" src="${iframeSrc}"></iframe>`);
+
+        let frames = this.$('iframe');
+        let existingAd, newAd;
+        if (frames.length > 1) {
+            existingAd = frames[0];
+            newAd = frames[1];
+        }
+        else {
+            newAd = frames[0];
+        }
+
+        this.$(newAd).on('load', () => {
+            console.log('iframe for ' + elementId + ' loaded');
+            if (existingAd) {
+                this.$(existingAd).remove();
+            }
+            this.$(newAd).show();
+        });
     },
 
     addTargeting(/* slot */) {
@@ -112,20 +155,29 @@ export default Component.extend(InViewportMixin, {
         // slot.setTargeting('refresh_count', get(this, 'refreshCount'));
         // slot.setTargeting('planet', 'Earth');
     },
+
     waitForRefresh() {
+        set(this, 'isRefreshDue', false);
+
+        let refreshInterval = get(this, 'refresh');
+        if (refreshInterval <= 0) {
+            this.trace('refresh is disabled');
+            return;
+        }
+
         let {refreshLimit, refreshCount} = getProperties(this, 'refreshLimit', 'refreshCount');
         if (refreshLimit > 0 && refreshCount >= refreshLimit) {
             this.trace(`refreshCount has met refreshLimit: ${refreshLimit}`);
-          return;
+            return;
         }
 
-        // give the tests a moment to release wait handlers
-        setTimeout(() => {
-            run(() => {
-                get(this, 'refreshWaitTask').perform();
-            });
-        });
+        this.trace(`waiting for ${refreshInterval} seconds to refresh`);
+        later(this, () => {
+            this.trace('refresh is due');
+            set(this, 'isRefreshDue', true);
+        }, 1000 * refreshInterval);
     },
+
     trace() {
         if (get(this, 'tracing')) {
             let {adId, placement} = getProperties(this, 'adId', 'placement');
@@ -133,61 +185,14 @@ export default Component.extend(InViewportMixin, {
         }
     },
 
-    refreshWaitTask: task(function * () {
-        let duration = get(this, 'refresh');
-
-        this.trace(`will refresh in ${duration} seconds`);
-
-        yield timeout(duration * 1000);
-
-        let {
-            shouldWatchViewport,
-            viewportEntered
-        } = getProperties(this,
-            'shouldWatchViewport',
-            'viewportEntered'
-        );
-
-        if (shouldWatchViewport && !viewportEntered) {
-            this.trace('ad not in view, delaying refresh');
-            set(this, 'isRefreshOverdue', true);
-            return;
-        }
-
-        if (!get(this, 'backgroundRefresh') && document.hidden) {
-            this.trace('ad is in background, delaying refresh');
-            set(this, 'isRefreshOverdue', true);
-            return;
-        }
-
-        this.doRefresh();
-    }).drop(), // don't reset the timer if you scroll out and back in view before it finishes
-
-    doRefresh() {
-        let googletag = window.googletag;
-        googletag.cmd.push( () => {
-            this.incrementProperty('refreshCount');
-            this.traceRefresh();
-
-            let slot = get(this, 'slot');
-            this.addTargeting(slot);
-            googletag.pubads().refresh([slot]);
-
-            this.waitForRefresh();
-        });
-    },
-
-    traceRefresh() {
-        let { refreshCount, refreshLimit } = getProperties(this, 'refreshCount', 'refreshLimit');
-        this.trace(`refreshing now: ${refreshCount} of ${refreshLimit}`);
-    },
-
     didEnterViewport() {
         this.trace('entered viewport');
-        this.initAd();
-        if (get(this, 'isRefreshOverdue')) {
-            this.doRefresh();
-            set(this, 'isRefreshOverdue', false);
-        }
-    }
+        set(this, 'inViewport', true);
+    },
+
+    didExitViewport() {
+        this.trace('exited viewport');
+        set(this, 'inViewport', false);
+    },
+
 });
