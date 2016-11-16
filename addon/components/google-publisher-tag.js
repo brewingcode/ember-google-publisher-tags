@@ -141,8 +141,10 @@ export default Component.extend(InViewportMixin, {
     },
 
     buildIframeJail() {
-        let { iframeJail, elementId } = getProperties(this, 'iframeJail', 'elementId');
-        this.$().append(`<iframe style="display:none" src="${iframeJail}"></iframe>`);
+        let { iframeJail, adId, width, height, elementId } =
+            getProperties(this, 'iframeJail', 'adId', 'width', 'height', 'elementId');
+
+        this.$().append(`<iframe style="display:none; width:${width}px; height:${height}px" frameBorder="0" src="${iframeJail}"></iframe>`);
 
         let frames = this.$('iframe');
         let existingAd, newAd;
@@ -155,7 +157,8 @@ export default Component.extend(InViewportMixin, {
         }
 
         this.$(newAd).on('load', () => {
-            console.log('iframe for ' + elementId + ' loaded');
+            newAd.contentWindow.ad = { adId, width, height };
+            newAd.contentWindow.startCallingGpt = true;
             if (existingAd) {
                 this.$(existingAd).remove();
             }
