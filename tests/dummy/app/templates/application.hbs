@@ -1,28 +1,27 @@
 <h3>Here is your sample ad:</h3>
 
 {{google-publisher-tag
+  class="start-shown"
   adId="/6355419/Travel/Europe/France/Paris"
   width=300
   height=250
-  refresh=5
-  refreshLimit=7
+  refresh=3
+  refreshLimit=10
   tracing=1
+  shouldWatchViewport=false
   placement="top"
-  shouldWatchViewport=true
-  iframeJail="/ad-iframe.html"
 }}
 
 <h3>Scroll down for another sample ad:</h3>
 
-<div style="margin-top: 2000px;">
+<div style="margin-top: 1000px;">
   {{google-publisher-tag
+    class="start-hidden"
     tracing=1
     adId="/6355419/Travel/Europe/France/Paris"
     width=300
     height=250
-    refresh=14
+    refresh=3
     placement="bottom"
-    shouldWatchViewport=true
-    iframeJail="/ad-iframe.html"
   }}
 </div>
