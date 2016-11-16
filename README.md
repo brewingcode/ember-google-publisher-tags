@@ -35,13 +35,14 @@ ads slows down your page.
   want to refresh ads while nobody is looking, set this to false.
 
 * `iframeJail`: By default, GPT runs in your page's window. Since ads do all sorts
-  of malicious crap, you can have the ads run inside an <iframe> of their very own.
+  of malicious crap, you can have the ads run inside an \<iframe> of their very own.
   Pass in a url that points to a page on your domain to serve ads in. See
   (this)[tests/dummy/ad-iframe.html] as an example.
 
 Additionally, if you want to use GPT's `setTargeting` function to serve targeted
 ads, extend the `GooglePublisherTag` component and override the `addTargeting`
-function in your child component:
+function in your child component. Inside this function, set the `targeting`
+property to an object:
 
 ```js
 // components/your-ad.js
@@ -50,11 +51,12 @@ import GPT from 'ember-google-publisher-tags/components/google-publisher-tag';
 export default GPT.extend({
     tracing: true, // useful for development, especially if it's computed
 
-    addTargeting(slot) {
-        slot.setTargeting('placement', this.get('placement'));
-        slot.setTargeting('refresh_count', this.get('refreshCount'));
-        slot.setTargeting('planet', 'Earth');
-        // ... more targeting, if desired
+    addTargeting() {
+        set(this, 'targeting', {
+            placement: get(this, 'placement'),
+            refresh_count: get(this, 'refreshCount'),
+            planet: 'Earth'
+        });
     }
 };
 ```

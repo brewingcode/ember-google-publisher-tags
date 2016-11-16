@@ -31,7 +31,12 @@ export default Ember.Service.extend({
                 let slot = googletag.defineSlot(adId, [width, height], elementId)
                     .addService(googletag.pubads());
                 component.set('slot', slot);
-                component.addTargeting(slot);
+
+                component.addTargeting();
+                let targeting = component.get('targeting');
+                Object.keys(targeting).forEach( k => {
+                    slot.setTargeting(k, targeting[k]);
+                });
             }
             catch (e) {
                 Ember.Logger.error('gpt exception: ', e);

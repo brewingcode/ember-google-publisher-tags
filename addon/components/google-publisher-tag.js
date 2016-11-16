@@ -25,6 +25,7 @@ export default Component.extend(InViewportMixin, {
     refreshCount: 0,
     slot: null,
     adQueue: service(),
+    targeting: {},
 
     // user-facing properties
     placement: 0,
@@ -127,10 +128,10 @@ export default Component.extend(InViewportMixin, {
         }
         else {
             let slot = get(this, 'slot');
+            this.addTargeting();
             let googletag = window.googletag;
             if (slot) {
                 googletag.cmd.push( () => {
-                    this.addTargeting(slot);
                     googletag.pubads().refresh([slot]);
                 });
             }
@@ -141,8 +142,8 @@ export default Component.extend(InViewportMixin, {
     },
 
     buildIframeJail() {
-        let { iframeJail, adId, width, height } =
-            getProperties(this, 'iframeJail', 'adId', 'width', 'height');
+        let { iframeJail, width, height } =
+            getProperties(this, 'iframeJail', 'width', 'height');
 
         this.$().append(`<iframe style="display:none; width:${width}px; height:${height}px" frameBorder="0" src="${iframeJail}"></iframe>`);
 
@@ -157,7 +158,14 @@ export default Component.extend(InViewportMixin, {
         }
 
         this.$(newAd).on('load', () => {
+            let { elementId, adId, targeting } = getProperties(this, 'elementId', 'adId', 'targeting');
+            this.trace(`passing info to iframe in ${elementId} for ${adId}: `, targeting);
+
             newAd.contentWindow.ad = { adId, width, height };
+            newAd.contentWindow.targeting = Object.keys(targeting).map( k => {
+                return [ k, targeting[k] ];
+            });
+
             newAd.contentWindow.startCallingGpt = true;
 
             later(this, () => {
@@ -169,11 +177,13 @@ export default Component.extend(InViewportMixin, {
         });
     },
 
-    addTargeting(/* slot */) {
+    addTargeting() {
         // override this in child components, if needed, but an example is:
-        // slot.setTargeting('placement', get(this, 'placement'));
-        // slot.setTargeting('refresh_count', get(this, 'refreshCount'));
-        // slot.setTargeting('planet', 'Earth');
+        // set(this, 'targeting', {
+        //     placement: get(this, 'placement'),
+        //     refresh_count: get(this, 'refreshCount'),
+        //     planet: 'Earth'
+        // });
     },
 
     waitForRefresh() {
