@@ -49,58 +49,56 @@ export default Component.extend(InViewportMixin, {
         let style = `width:${width}px; height:${height}px;`;
         set(this, 'style', htmlSafe(style));
     },
+
     didInsertElement() {
-        let {
-            shouldWatchViewport,
-            width,
-            height
-        } = getProperties(this,
-            'shouldWatchViewport',
-            'width',
-            'height'
-        );
-
-        setProperties(this, {
-            viewportEnabled: shouldWatchViewport,
-            viewportSpy: true,
-            viewportTolerance: getViewportTolerance(width, height, 0.5)
-        });
-
-        // we must set the properties above first before calling super
-        // where the mixin consumes the properties
+        this.viewportSetup();
+        // we must call viewportSetup() first before calling super
+        // where the ember-in-viewport mixin consumes the properties
         this._super(...arguments);
 
-        if (!shouldWatchViewport) {
-            scheduleOnce('afterRender', () => {
-                this.initAd();
-            });
-        } else {
-            // watch via this.didEnterViewport(), below
-            this.trace('watching viewport, waiting for event...');
-        }
+        this.backgroundSetup();
+        this.refreshSetup();
+    },
 
-        if (!get(this, 'backgroundRefresh')) {
+    viewportSetup() {
+        let { shouldWatchViewport, width, height } =
+            getProperties(this, 'shouldWatchViewport', 'width', 'height');
+
+        if (shouldWatchViewport) {
+            setProperties(this, {
+                viewportEnabled: shouldWatchViewport,
+                viewportSpy: true,
+                viewportTolerance: getViewportTolerance(width, height, 0.5)
+            });
+            set(this, 'inViewport', false);
+        }
+        else {
+            // since enter/exit hooks won't be fired, `inViewport` will never change. So,
+            // we set this to true here now and forever
+            set(this, 'inViewport', true);
+        }
+    },
+
+    backgroundSetup() {
+        if (get(this, 'backgroundRefresh')) {
+            // since we're not going to hook the visibilitychange event, set this manually
+            set(this, 'inForeground', true);
+        }
+        else {
+            set(this, 'inForeground', !document.hidden);
             if (document && document.addEventListener) {
                 document.addEventListener('visibilitychange', () => {
                     this.trace('visibilitychange: document.hidden: ', document.hidden);
-                    if (!document.hidden) {
-                        if (shouldWatchViewport) {
-                            this.trace('visibilitychange: watching viewport instead, skipping init');
-                        }
-                        else {
-                            this.initAd();
-                        }
-                    }
-                }, false);
+                    set(this, 'inForeground', !document.hidden);
+                });
             }
         }
     },
 
-    initAd() {
-        if (!get(this, 'isAdInitialized')) {
-            this.trace('initializing');
-            set(this, 'isAdInitialized', true);
-        }
+    refreshSetup() {
+        // for setup, we always set this to true to initialize the ad the first time
+        set(this, 'isRefreshDue', true);
+    },
 
         let duration = get(this, 'refresh');
             if (duration > 0) {
