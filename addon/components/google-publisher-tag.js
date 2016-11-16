@@ -141,8 +141,8 @@ export default Component.extend(InViewportMixin, {
     },
 
     buildIframeJail() {
-        let { iframeJail, adId, width, height, elementId } =
-            getProperties(this, 'iframeJail', 'adId', 'width', 'height', 'elementId');
+        let { iframeJail, adId, width, height } =
+            getProperties(this, 'iframeJail', 'adId', 'width', 'height');
 
         this.$().append(`<iframe style="display:none; width:${width}px; height:${height}px" frameBorder="0" src="${iframeJail}"></iframe>`);
 
@@ -159,10 +159,13 @@ export default Component.extend(InViewportMixin, {
         this.$(newAd).on('load', () => {
             newAd.contentWindow.ad = { adId, width, height };
             newAd.contentWindow.startCallingGpt = true;
-            if (existingAd) {
-                this.$(existingAd).remove();
-            }
-            this.$(newAd).show();
+
+            later(this, () => {
+                if (existingAd) {
+                    this.$(existingAd).remove();
+                }
+                this.$(newAd).show();
+            }, 500);
         });
     },
 
