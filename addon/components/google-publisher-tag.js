@@ -5,17 +5,7 @@
 //    - height: a css size in pixels
 //    - width: ditto
 //
-// optional props:
-//    - placement: only useful if the same `adId` is used more than once on a
-//      page, use this to distinguish between them: call one "1" and the other
-//      "2", or call them "top-left" and "bottom-right", etc
-//    - refresh: number of seconds between refreshes
-//    - refreshLimit: number of times to refresh, after which no more refreshes
-//      happen (0 is no limit)
-//    - tracing: verbose messages in console.log via Ember.Logger.log
-//    - shouldWatchViewport: do not refresh ads outside the viewport
-//    - backgroundRefresh: refresh ads when tabs in are backgrounded
-//    - iframeSrc: url for the iframe to use (see tests/dummy/public/ad-iframe.html)
+// See README for optional/user-facing properties.
 
 import Ember from 'ember';
 import InViewportMixin from 'ember-in-viewport';
@@ -26,20 +16,24 @@ const {
     String: { htmlSafe },
     Logger: { log },
     run: { later },
+    inject: { service },
 } = Ember;
 
 export default Component.extend(InViewportMixin, {
     classNames: ['google-publisher-tag'],
     attributeBindings: ['style'],
     refreshCount: 0,
+    slot: null,
+    adQueue: service(),
 
+    // user-facing properties
     placement: 0,
     refresh: 0,
     refreshLimit: 0,
     tracing: false,
     shouldWatchViewport: true,
     backgroundRefresh: false,
-    iframeSrc: '/ad-iframe.html',
+    iframeJail: null,
 
     didReceiveAttrs() {
         this._super(...arguments);
@@ -115,10 +109,7 @@ export default Component.extend(InViewportMixin, {
             }
         });
         if (count === 3) {
-            this.incrementProperty('refreshCount');
-            let { refreshCount, refreshLimit } = getProperties(this, 'refreshCount', 'refreshLimit');
-            this.trace(`refreshing now: ${refreshCount} of ${refreshLimit}`);
-            this.initAd();
+            this.doRefresh();
             this.waitForRefresh();
         }
         else {
@@ -126,9 +117,32 @@ export default Component.extend(InViewportMixin, {
         }
     }),
 
-    initAd() {
-        let { iframeSrc, elementId } = getProperties(this, 'iframeSrc', 'elementId');
-        this.$().append(`<iframe style="display:none" src="${iframeSrc}"></iframe>`);
+    doRefresh() {
+        this.incrementProperty('refreshCount');
+        let { refreshCount, refreshLimit } = getProperties(this, 'refreshCount', 'refreshLimit');
+        this.trace(`refreshing now: ${refreshCount} of ${refreshLimit}`);
+
+        if (get(this, 'iframeJail')) {
+            this.buildIframeJail();
+        }
+        else {
+            let slot = get(this, 'slot');
+            let googletag = window.googletag;
+            if (slot) {
+                googletag.cmd.push( () => {
+                    this.addTargeting(slot);
+                    googletag.pubads().refresh([slot]);
+                });
+            }
+            else {
+                get(this, 'adQueue').push(this);
+            }
+        }
+    },
+
+    buildIframeJail() {
+        let { iframeJail, elementId } = getProperties(this, 'iframeJail', 'elementId');
+        this.$().append(`<iframe style="display:none" src="${iframeJail}"></iframe>`);
 
         let frames = this.$('iframe');
         let existingAd, newAd;
