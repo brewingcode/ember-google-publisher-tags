@@ -1,8 +1,12 @@
 /* jshint node: true */
 'use strict';
 
+var Funnel = require('broccoli-funnel');
+var mergeTrees = require('broccoli-merge-trees');
+
 module.exports = {
   name: 'ember-google-publisher-tags',
+
   contentFor: function(type, config) {
     if (type === 'head-footer') {
       return `
@@ -22,6 +26,12 @@ module.exports = {
 </script>
       `;
     }
-  }
+  },
 
+  treeForPublic: function(tree) {
+    var assetsTree = new Funnel('public');
+    return mergeTrees([tree, assetsTree], {
+      overwrite: true
+    });
+  }
 };

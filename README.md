@@ -1,4 +1,5 @@
 # ember-google-publisher-tags
+
 [![npm version](https://badge.fury.io/js/ember-google-publisher-tags.svg)](https://badge.fury.io/js/ember-google-publisher-tags)
 
 An Ember component for adding [GPT](https://support.google.com/dfp_sb/answer/1649768?hl=en)
@@ -35,8 +36,9 @@ Optional properties:
 
 * `iframeJail=URL`: By default, GPT runs in your page's window. Since ads do all sorts
   of malicious crap, you can have the ads run inside an \<iframe> of their very own.
-  Pass in a url that points to a page on your domain to serve ads in, and copy the
-  [example .html file](tests/dummy/public/ad-iframe.html) file to this location.
+  To use this jail, pass in the url that points to your application's `dist/gpt-iframe.html`
+  file; [this file](public/gpt-iframe.html) is merged into your `dist` during the Ember
+  build.
 
 Additionally, if you want to use GPT's `setTargeting` function to serve targeted
 ads, extend the `GooglePublisherTag` component and override the `addTargeting`
@@ -72,13 +74,13 @@ export default GPT.extend({
 2. If your app uses Ember's default `index.html`, no further installation is needed: this
   addon hooks into Ember's `head-footer` generation.
 
-3. If you are using `iframeJail`, your iframe's HTML will need to look a certain way:
-  copy the [example .html file](tests/dummy/public/ad-iframe.html) to get started.
-  This file includes this GPT initialization boilerplate.
+3. If you are using `iframeJail`, make sure the URL you set this property to points to your
+  application's `dist/gpt-iframe.html` file. This file contains the GPT initialization
+  boilerplate already.
 
 4. If neither #2 or #3 apply to you, you'll have to manually add the GPT initialization
   \<script> tag to your page \<head>. Copy it from either [index.html](index.html) or
-  [ad-iframe.html](tests/dummy/public/ad-iframe.html), and paste it wherever you need to
+  [gpt-iframe.html](public/gpt-iframe.html), and paste it wherever you need to
   in your app's structure.
 
 ## Troubleshooting
