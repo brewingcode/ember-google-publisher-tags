@@ -36,6 +36,13 @@ var areWeThereYet = setInterval(function() {
                 [ window.ad.width, window.ad.height ],
                 "gpt-ad"
             ).addService(g.pubads());
+
+            if (window.targeting) {
+                window.targeting.forEach(function(pair) {
+                    slot.setTargeting(pair[0], pair[1]);
+                });
+            }
+
             g.enableServices();
             g.display("gpt-ad");
         })
