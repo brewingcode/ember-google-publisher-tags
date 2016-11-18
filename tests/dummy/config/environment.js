@@ -12,7 +12,8 @@ module.exports = function(environment) {
         // e.g. 'with-controller': true
       }
     },
-    //iframeJail: "/gpt-iframe.html",
+    //gptIframeJail: true,
+    //gptIframeRootUrl: '',
     APP: {
       // Here you can pass flags/options to your application instance
       // when it is created

@@ -3,6 +3,7 @@
 
 module.exports = function(/* environment, appConfig */) {
   return {
-  	iframeJail: null
+    gptIframeJail: false,
+    gptIframeRootUrl: ''
   };
 };
