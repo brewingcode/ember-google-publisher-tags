@@ -8,7 +8,7 @@ module.exports = {
   name: 'ember-google-publisher-tags',
 
   contentFor: function(type, config) {
-    if (type === 'head-footer') {
+    if (type === 'head-footer' && !this.app.options.iframeJail) {
       return `
 <script type='text/javascript'>
   var googletag = googletag || {};
@@ -28,10 +28,19 @@ module.exports = {
     }
   },
 
+  config: function(env, config) {
+    if (this.app) {
+      // TODO: this check is necessary for "ember serve", but not "ember build": why?
+      this.app.options.iframeJail = config.iframeJail;
+    }
+  },
+
   treeForPublic: function(tree) {
-    var assetsTree = new Funnel('public');
-    return mergeTrees([tree, assetsTree], {
-      overwrite: true
-    });
+    if (this.app.options.iframeJail) {
+      var assetsTree = new Funnel('public');
+      return mergeTrees([tree, assetsTree], {
+        overwrite: true
+      });
+    }
   }
 };

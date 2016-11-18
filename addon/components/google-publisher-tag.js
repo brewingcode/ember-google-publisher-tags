@@ -10,6 +10,7 @@
 import Ember from 'ember';
 import InViewportMixin from 'ember-in-viewport';
 import getViewportTolerance from '../utils/get-viewport-tolerance';
+import config from 'ember-get-config';
 
 const {
     Component, assert, get, set, getProperties, setProperties, observer,
@@ -26,6 +27,7 @@ export default Component.extend(InViewportMixin, {
     slot: null,
     adQueue: service(),
     targeting: {},
+    iframeJail: null,
 
     // user-facing properties
     placement: 0,
@@ -34,10 +36,13 @@ export default Component.extend(InViewportMixin, {
     tracing: false,
     shouldWatchViewport: true,
     backgroundRefresh: false,
-    iframeJail: null,
 
     didReceiveAttrs() {
         this._super(...arguments);
+
+        if (config.iframeJail) {
+            set(this, 'iframeJail', config.iframeJail);
+        }
 
         let {adId, width, height, placement} = getProperties(this, 'adId', 'width', 'height', 'placement');
 
@@ -51,7 +56,7 @@ export default Component.extend(InViewportMixin, {
 
     didInsertElement() {
         this.viewportSetup();
-        // we must call viewportSetup() first before calling super
+        // we must call viewportSetup() first before calling ._super()
         // where the ember-in-viewport mixin consumes the properties
         this._super(...arguments);
 

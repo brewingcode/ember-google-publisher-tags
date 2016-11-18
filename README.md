@@ -34,12 +34,6 @@ Optional properties:
   according to the `document.hidden` property. If, for some strange reason, you
   want to refresh ads while nobody is looking, set this to true.
 
-* `iframeJail=URL`: By default, GPT runs in your page's window. Since ads do all sorts
-  of malicious crap, you can have the ads run inside an \<iframe> of their very own.
-  To use this jail, pass in the url that points to your application's `dist/gpt-iframe.html`
-  file; [this file](public/gpt-iframe.html) is merged into your `dist` during the Ember
-  build.
-
 Additionally, if you want to use GPT's `setTargeting` function to serve targeted
 ads, extend the `GooglePublisherTag` component and override the `addTargeting`
 function in your child component. Inside this function, set the `targeting`
@@ -72,22 +66,46 @@ export default GPT.extend({
 1. `ember install ember-google-publisher-tags`
 
 2. If your app uses Ember's default `index.html`, no further installation is needed: this
-  addon hooks into Ember's `head-footer` generation.
+  addon uses Ember's `head-footer` hook to insert the GPT initialization code into your
+  page \<head>s (unless you use `iframeJail`, see below).
 
-3. If you are using `iframeJail`, make sure the URL you set this property to points to your
-  application's `dist/gpt-iframe.html` file. This file contains the GPT initialization
-  boilerplate already.
-
-4. If neither #2 or #3 apply to you, you'll have to manually add the GPT initialization
+3. If #2 does not apply to you, you'll have to manually add the GPT initialization
   \<script> tag to your page \<head>. Copy it from either [index.html](index.html) or
   [gpt-iframe.html](public/gpt-iframe.html), and paste it wherever you need to
   in your app's structure.
+
+## Configuration
+
+### iframeJail
+
+By default, GPT runs in your page's window. Since ads do all sorts of
+malicious crap, you can have the ads run inside an \<iframe> jail of their
+very own. This addon comes with its own [gpt-iframe.html](public/gpt-iframe.html) file
+for exactly this purpose.
+
+To use this jail, set the `iframeJail` config value to a URL that your Ember application
+can reach `dist/gpt-iframe.html` at. This file is automatically bundled into `dist` once
+you define `iframeJail` to non-null and run `ember build` or `ember serve`. This also
+disables the `head-footer` hook that would normally cause this addon to inject the GPT
+loading \<script> into your page \<head>s.
+
+```js
+// config/environment.js
+
+module.exports = function(environment) {
+    var ENV = {
+        // your config settings
+        iframeJail: '/gpt-iframe.html'
+    };
+```
 
 ## Troubleshooting
 
 1. Make sure your ad blocker isn't interfering.
 
-2. Add `googfc` as a query parameter to your url, this will activate an in-page
+2. Set `tracing` to true, and follow what the addon does in your browser's console.
+
+3. Add `googfc` as a query parameter to your url, this will activate an in-page
 debugging console. Eg, `http://localhost:4200/?googfc`. [More info here](https://support.google.com/dfp_sb/answer/181070?hl=en).
 
 ## Docs
