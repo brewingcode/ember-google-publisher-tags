@@ -41,8 +41,8 @@ export default Component.extend(InViewportMixin, {
         this._super(...arguments);
 
         if (config.gpt && config.gpt.iframeJail)  {
-            let rootUrl = config.gpt.iframeRootUrl || '';
-            set(this, 'iframeUrl', rootUrl + '/gpt-iframe.html');
+            let rootUrl = config.gpt.iframeRootUrl || config.rootURL;
+            set(this, 'iframeUrl', `${rootUrl}gpt-iframe.html`);
         }
 
         let {adId, width, height, placement} = getProperties(this, 'adId', 'width', 'height', 'placement');

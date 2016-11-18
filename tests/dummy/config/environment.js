@@ -14,7 +14,7 @@ module.exports = function(environment) {
     },
     // gpt: {
     //   iframeJail: false,
-    //   iframeRootUrl: ''
+    //   iframeRootUrl: '/'
     // },
     APP: {
       // Here you can pass flags/options to your application instance

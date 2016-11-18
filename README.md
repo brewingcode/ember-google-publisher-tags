@@ -89,11 +89,10 @@ for exactly this purpose. Set this property to `true` to:
 2. *disable* the `head-footer` hook for this addon, so that your page `<head>` is
 unaffected
 
-### gpt.iframeRootUrl: string (default: "")
+### gpt.iframeRootUrl: string (default: ENV.rootURL)
 
-If your `dist` folder is not accessible at the root of your domain, or if you need to
-put the `gpt-iframe.html` file somewhere else, use this property. It will be prepended
-to the `src` attribute of the iframe, which is `/gpt-iframe.html` by default.
+If your `dist` folder is not accessible at your application-defined `rootURL`,
+use this property.
 
 ```js
 // config/environment.js
@@ -103,7 +102,7 @@ module.exports = function(environment) {
         gpt: {
             // your config settings
             iframeJail: true,
-            iframeRootUrl: '/somewhere/else'
+            iframeRootUrl: '/somewhere/else/'
         }
     };
 ```
