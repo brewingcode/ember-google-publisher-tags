@@ -40,8 +40,8 @@ export default Component.extend(InViewportMixin, {
     didReceiveAttrs() {
         this._super(...arguments);
 
-        if (config.gptIframeJail) {
-            let rootUrl = config.gptIframeRootUrl || '';
+        if (config.gpt && config.gpt.iframeJail)  {
+            let rootUrl = config.gpt.iframeRootUrl || '';
             set(this, 'iframeUrl', rootUrl + '/gpt-iframe.html');
         }
 

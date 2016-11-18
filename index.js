@@ -31,7 +31,7 @@ module.exports = {
   config: function(env, config) {
     if (this.app) {
       // TODO: `this.app` check is necessary for "ember serve", but not "ember build": why?
-      this.app.options.gptIframeJail = config.gptIframeJail;
+      this.app.options.gptIframeJail = config.gpt && config.gpt.iframeJail;
     }
   },
 
