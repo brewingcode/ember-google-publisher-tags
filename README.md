@@ -70,7 +70,7 @@ export default GPT.extend({
   page \<head>s (unless you use `iframeJail`, see below).
 
 3. If #2 does not apply to you, you'll have to manually add the GPT initialization
-  \<script> tag to your page \<head>. Copy it from either [index.html](index.html) or
+  \<script> tag to your page \<head>. Copy it from either [index.js](index.js) or
   [gpt-iframe.html](public/gpt-iframe.html), and paste it wherever you need to
   in your app's structure.
 
