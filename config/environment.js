@@ -2,8 +2,5 @@
 'use strict';
 
 module.exports = function(/* environment, appConfig */) {
-  return {
-    gptIframeJail: false,
-    gptIframeRootUrl: ''
-  };
+  return { };
 };
