@@ -23,7 +23,8 @@ Optional properties:
 * `refresh=N`: Refresh the ad after `N` seconds. Each refresh also increments
   the `refreshCount` property, which might be useful.
 
-* `refreshLimit=N` Limit refreshing to `N` times. For example, setting to 5 would stop refreshing after the 5th time.
+* `refreshLimit=N` Limit refreshing to `N` times. For example, setting to 5 would
+  stop refreshing after the 5th time.
 
 * `tracing=true`: Turn on `Ember.Logger.log` tracing.
 
@@ -67,35 +68,42 @@ export default GPT.extend({
 
 2. If your app uses Ember's default `index.html`, no further installation is needed: this
   addon uses Ember's `head-footer` hook to insert the GPT initialization code into your
-  page \<head>s (unless you use `iframeJail`, see below).
+  page `<head>`s (unless you use `iframeJail`, see below).
 
 3. If #2 does not apply to you, you'll have to manually add the GPT initialization
-  \<script> tag to your page \<head>. Copy it from either [index.html](index.html) or
+  `<script>` tag to your page `<head>`. Copy it from either [index.js](index.js) or
   [gpt-iframe.html](public/gpt-iframe.html), and paste it wherever you need to
   in your app's structure.
 
 ## Configuration
 
-### iframeJail
+### gpt.iframeJail: boolean (default: false)
 
 By default, GPT runs in your page's window. Since ads do all sorts of
-malicious crap, you can have the ads run inside an \<iframe> jail of their
+malicious crap, you can have the ads run inside an `<iframe>` jail of their
 very own. This addon comes with its own [gpt-iframe.html](public/gpt-iframe.html) file
-for exactly this purpose.
+for exactly this purpose. Set this property to `true` to:
 
-To use this jail, set the `iframeJail` config value to a URL that your Ember application
-can reach `dist/gpt-iframe.html` at. This file is automatically bundled into `dist` once
-you define `iframeJail` to non-null and run `ember build` or `ember serve`. This also
-disables the `head-footer` hook that would normally cause this addon to inject the GPT
-loading \<script> into your page \<head>s.
+1. Put all GPT javascript inside its own `<iframe>`
+
+2. *disable* the `head-footer` hook for this addon, so that your page `<head>` is
+unaffected
+
+### gpt.iframeRootUrl: string (default: ENV.rootURL)
+
+If your `dist` folder is not accessible at your application-defined `rootURL`,
+use this property.
 
 ```js
 // config/environment.js
 
 module.exports = function(environment) {
     var ENV = {
-        // your config settings
-        iframeJail: '/gpt-iframe.html'
+        gpt: {
+            // your config settings
+            iframeJail: true,
+            iframeRootUrl: '/somewhere/else/'
+        }
     };
 ```
 

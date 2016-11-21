@@ -27,7 +27,7 @@ export default Component.extend(InViewportMixin, {
     slot: null,
     adQueue: service(),
     targeting: {},
-    iframeJail: null,
+    iframeUrl: null,
 
     // user-facing properties
     placement: 0,
@@ -40,8 +40,9 @@ export default Component.extend(InViewportMixin, {
     didReceiveAttrs() {
         this._super(...arguments);
 
-        if (config.iframeJail) {
-            set(this, 'iframeJail', config.iframeJail);
+        if (config.gpt && config.gpt.iframeJail)  {
+            let rootUrl = config.gpt.iframeRootUrl || config.rootURL;
+            set(this, 'iframeUrl', `${rootUrl}gpt-iframe.html`);
         }
 
         let {adId, width, height, placement} = getProperties(this, 'adId', 'width', 'height', 'placement');
@@ -128,7 +129,7 @@ export default Component.extend(InViewportMixin, {
         let { refreshCount, refreshLimit } = getProperties(this, 'refreshCount', 'refreshLimit');
         this.trace(`refreshing now: ${refreshCount} of ${refreshLimit}`);
 
-        if (get(this, 'iframeJail')) {
+        if (get(this, 'iframeUrl')) {
             this.buildIframeJail();
         }
         else {
@@ -147,10 +148,10 @@ export default Component.extend(InViewportMixin, {
     },
 
     buildIframeJail() {
-        let { iframeJail, width, height } =
-            getProperties(this, 'iframeJail', 'width', 'height');
+        let { iframeUrl, width, height } =
+            getProperties(this, 'iframeUrl', 'width', 'height');
 
-        this.$().append(`<iframe style="display:none; width:${width}px; height:${height}px" frameBorder="0" src="${iframeJail}"></iframe>`);
+        this.$().append(`<iframe style="display:none; width:${width}px; height:${height}px" frameBorder="0" src="${iframeUrl}"></iframe>`);
 
         let frames = this.$('iframe');
         let existingAd, newAd;
