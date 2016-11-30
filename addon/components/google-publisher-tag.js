@@ -128,13 +128,13 @@ export default Component.extend(InViewportMixin, {
         this.incrementProperty('refreshCount');
         let { refreshCount, refreshLimit } = getProperties(this, 'refreshCount', 'refreshLimit');
         this.trace(`refreshing now: ${refreshCount} of ${refreshLimit}`);
+        this.addTargeting();
 
         if (get(this, 'iframeUrl')) {
             this.buildIframeJail();
         }
         else {
             let slot = get(this, 'slot');
-            this.addTargeting();
             let googletag = window.googletag;
             if (slot) {
                 googletag.cmd.push( () => {
