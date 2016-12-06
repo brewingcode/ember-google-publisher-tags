@@ -20,6 +20,12 @@ const {
     inject: { service },
 } = Ember;
 
+function safeSet(obj, ...args) {
+    if (obj && !get(obj, 'isDestroyed') && !get(obj, 'isDestroying')) {
+        set(obj, ...args);
+    }
+}
+
 export default Component.extend(InViewportMixin, {
     classNames: ['google-publisher-tag'],
     attributeBindings: ['style'],
@@ -94,7 +100,7 @@ export default Component.extend(InViewportMixin, {
             if (document && document.addEventListener) {
                 document.addEventListener('visibilitychange', () => {
                     this.trace('visibilitychange: document.hidden: ', document.hidden);
-                    set(this, 'inForeground', !document.hidden);
+                    safeSet(this, 'inForeground', !document.hidden);
                 });
             }
         }
@@ -125,7 +131,9 @@ export default Component.extend(InViewportMixin, {
     }),
 
     doRefresh() {
-        this.incrementProperty('refreshCount');
+        if (!get(this, 'isDestroying') && !get(this, 'isDestroyed')) {
+            this.incrementProperty('refreshCount');
+        }
         let { refreshCount, refreshLimit } = getProperties(this, 'refreshCount', 'refreshLimit');
         this.trace(`refreshing now: ${refreshCount} of ${refreshLimit}`);
         this.addTargeting();
@@ -193,7 +201,7 @@ export default Component.extend(InViewportMixin, {
     },
 
     waitForRefresh() {
-        set(this, 'isRefreshDue', false);
+        safeSet(this, 'isRefreshDue', false);
 
         let refreshInterval = get(this, 'refresh');
         if (refreshInterval <= 0) {
@@ -210,7 +218,7 @@ export default Component.extend(InViewportMixin, {
         this.trace(`waiting for ${refreshInterval} seconds to refresh`);
         later(this, () => {
             this.trace('refresh is due');
-            set(this, 'isRefreshDue', true);
+            safeSet(this, 'isRefreshDue', true);
         }, 1000 * refreshInterval);
     },
 
@@ -223,12 +231,12 @@ export default Component.extend(InViewportMixin, {
 
     didEnterViewport() {
         this.trace('entered viewport');
-        set(this, 'inViewport', true);
+        safeSet(this, 'inViewport', true);
     },
 
     didExitViewport() {
         this.trace('exited viewport');
-        set(this, 'inViewport', false);
+        safeSet(this, 'inViewport', false);
     },
 
 });

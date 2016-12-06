@@ -48,6 +48,8 @@ export default GPT.extend({
     tracing: true, // useful for development, especially if it's computed
 
     addTargeting() {
+        // depending on your application, you might want to check Ember's
+        // `isDestroyed` and `isDestroying` properties before calling `set`
         set(this, 'targeting', {
             placement: get(this, 'placement'),
             refresh_count: get(this, 'refreshCount'),
