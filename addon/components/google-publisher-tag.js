@@ -144,7 +144,7 @@ export default Component.extend(InViewportMixin, {
         else {
             let slot = get(this, 'slot');
             let googletag = window.googletag;
-            if (slot) {
+            if (slot && googletag && googletag.cmd) {
                 googletag.cmd.push( () => {
                     googletag.pubads().refresh([slot]);
                 });

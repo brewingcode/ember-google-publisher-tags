@@ -67,11 +67,13 @@ export default Ember.Service.extend({
     _pushCmd(cmdFunc) {
         this._wrapErrorHandling(() => {
             let { googletag } = window;
-            googletag.cmd.push(() => {
-                this._wrapErrorHandling(() => {
-                    cmdFunc(googletag);
+            if (googletag && googletag.cmd) {
+                googletag.cmd.push(() => {
+                    this._wrapErrorHandling(() => {
+                        cmdFunc(googletag);
+                    });
                 });
-            });
+            }
         });
     },
     _wrapErrorHandling(func) {
