@@ -156,36 +156,32 @@ export default Component.extend(InViewportMixin, {
     },
 
     buildIframeJail() {
-        let { iframeUrl, width, height } =
-            getProperties(this, 'iframeUrl', 'width', 'height');
+        let { iframeUrl, width, height, adId, targeting } =
+            getProperties(this, 'iframeUrl', 'width', 'height', 'adId', 'targeting');
 
-        this.$().append(`<iframe style="display:none; width:${width}px; height:${height}px" frameBorder="0" src="${iframeUrl}"></iframe>`);
+        let adParams = { adId, width, height }
+        let targetingParams = Object.keys(targeting).map( k => {
+            return [ k, targeting[k] ];
+        });
+
+        this.$().prepend(`<iframe style="display:none; width:${width}px; height:${height}px" frameBorder="0" src="${iframeUrl}"></iframe>`);
 
         let frames = this.$('iframe');
-        let existingAd, newAd;
-        if (frames.length > 1) {
-            existingAd = frames[0];
-            newAd = frames[1];
-        }
-        else {
-            newAd = frames[0];
-        }
+        let newAd = frames.get(0)
+        let existingAds = frames.length > 1 ? frames.slice(1) : this.$([]);
 
         this.$(newAd).on('load', () => {
-            let { elementId, adId, targeting } = getProperties(this, 'elementId', 'adId', 'targeting');
-            this.trace(`passing info to iframe in ${elementId} for ${adId}: `, targeting);
+            let elementId = get(this, 'elementId');
+            this.trace(`passing info to iframe in ${elementId} for ${adId}: `, targetingParams);
 
-            newAd.contentWindow.ad = { adId, width, height };
-            newAd.contentWindow.targeting = Object.keys(targeting).map( k => {
-                return [ k, targeting[k] ];
-            });
-
+            newAd.contentWindow.ad = adParams;
+            newAd.contentWindow.targeting = targetingParams;
             newAd.contentWindow.startCallingGpt = true;
 
             later(this, () => {
-                if (existingAd) {
-                    this.$(existingAd).remove();
-                }
+                existingAds.each( (index, node) => {
+                    $(node).remove();
+                });
                 this.$(newAd).show();
             }, 500);
         });
