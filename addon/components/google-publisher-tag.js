@@ -158,13 +158,21 @@ export default Component.extend(InViewportMixin, {
     buildIframeJail() {
         let { iframeUrl, width, height, adId, targeting } =
             getProperties(this, 'iframeUrl', 'width', 'height', 'adId', 'targeting');
+        let iframeExternalUrl = config.gpt && config.gpt.iframeExternalUrl;
 
         let adParams = { adId, width, height }
         let targetingParams = Object.keys(targeting).map( k => {
             return [ k, targeting[k] ];
         });
 
-        this.$().prepend(`<iframe style="display:none; width:${width}px; height:${height}px" frameBorder="0" src="${iframeUrl}"></iframe>`);
+        let finalUrl = iframeUrl;
+        if (iframeExternalUrl) {
+            finalUrl = iframeExternalUrl + encodeURIComponent(JSON.stringify({
+                ad: adParams,
+                targeting: targetingParams,
+            }));
+        }
+        this.$().prepend(`<iframe style="display:none; width:${width}px; height:${height}px" frameBorder="0" src="${finalUrl}"></iframe>`);
 
         let frames = this.$('iframe');
         let newAd = frames.get(0)
@@ -174,9 +182,11 @@ export default Component.extend(InViewportMixin, {
             let elementId = get(this, 'elementId');
             this.trace(`passing info to iframe in ${elementId} for ${adId}: `, targetingParams);
 
-            newAd.contentWindow.ad = adParams;
-            newAd.contentWindow.targeting = targetingParams;
-            newAd.contentWindow.startCallingGpt = true;
+            if (!iframeExternalUrl) {
+                newAd.contentWindow.ad = adParams;
+                newAd.contentWindow.targeting = targetingParams;
+                newAd.contentWindow.startCallingGpt = true;
+            }
 
             later(this, () => {
                 existingAds.each( (index, node) => {
