@@ -109,6 +109,112 @@ module.exports = function(environment) {
     };
 ```
 
+### gpt.iframeExternalUrl: string (default: none)
+
+Use this url to host your ad iframe on a completely separate domain. Because
+of cross-origin policy, using this kind of iframe requires passing things like
+ad ID and targeting info via url query param, instead of via `.contentWindow`.
+This also means whatever is handling the url needs to decode the query
+parameter and pass it along to the GPT javascript.
+
+`iframeExternalUrl` will ignore `iframeRootUrl`, if both are defined in your
+environment.js.
+
+Here is a full example:
+
+1. Define `iframeExternalUrl` as `//www.example.com/gpt-iframe.php?q=`. Note
+that url ends with an unset query parameter: **this is required**.
+
+2. The addon will create an iframe like this:
+
+    ```html
+    <iframe src="//wwww.example.com/gpt-iframe.php?q=%7B%22ad%22%3A%7B%22adId%22
+    %3A%22%2F6355419%2FTravel%2FEurope%2FFrance%2FParis%22%2C%22width%22%3A300
+    %2C%22height%22%3A250%7D%2C%22targeting%22%3A%5B%5B%22planet%22%2C%22Earth
+    %22%5D%2C%5B%22refreshCount%22%3A%222%22%5D%5D%7D%0A" ...></iframe>
+    ```
+
+    The above query-encoded string is JSON, if it was decoded and pretty-printed
+    it would be:
+
+    ```js
+    {
+      "ad": {
+        "adId": "/6355419/Travel/Europe/France/Paris",
+        "width":300,
+        "height":250
+      },
+      "targeting": [
+        ["planet","Earth"],
+        ["refreshCount":"2"]
+      ]
+    }
+    ```
+
+3. The PHP that handlesgq}J the request looks very similar to
+[gpt-iframe.html](public/gpt-iframe.html), except it decodes the query string and
+assigns `window.ad` and `window.targeting`. It also doesn't have to worry
+about polling the `window.startCallingGpt` variable, so that code is removed.
+
+    ```php
+    <?php
+    $params = json_decode($_GET['q']);
+    function json2js($k) {
+        global $params;
+        return json_encode($params->$k, JSON_UNESCAPED_SLASHES) . ";\n";
+    }
+    ?>
+    <html>
+        <head>
+            <script type='text/javascript'>
+    var googletag = googletag || {};
+    googletag.cmd = googletag.cmd || [];
+    (function() {
+        var gads = document.createElement('script');
+        gads.async = true;
+        gads.type = 'text/javascript';
+        var useSSL = 'https:' == document.location.protocol;
+        gads.src = (useSSL ? 'https:' : 'http:') +
+          '//www.googletagservices.com/tag/js/gpt.js';
+        var node = document.getElementsByTagName('script')[0];
+        node.parentNode.insertBefore(gads, node);
+    })();
+            </script>
+            <style>
+    body {
+        margin: 0;
+    }
+            </style>
+        </head>
+        <body>
+            <div id="gpt-ad"></div>
+            <script>
+
+    window.ad = <?= json2js('ad') ?>
+    window.targeting = <?= json2js('targeting') ?>
+
+    var g = googletag;
+    g.cmd.push( function() {
+        var slot = g.defineSlot(
+            window.ad.adId,
+            [ window.ad.width, window.ad.height ],
+            "gpt-ad"
+        ).addService(g.pubads());
+
+        if (window.targeting) {
+            window.targeting.forEach(function(pair) {
+                slot.setTargeting(pair[0], pair[1]);
+            });
+        }
+
+        g.enableServices();
+        g.display("gpt-ad");
+    });
+            </script>
+        </body>
+    </html>
+    ```
+
 ## Troubleshooting
 
 1. Make sure your ad blocker isn't interfering.
