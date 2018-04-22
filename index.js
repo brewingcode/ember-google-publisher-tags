@@ -1,14 +1,11 @@
 /* jshint node: true */
 'use strict';
 
-var Funnel = require('broccoli-funnel');
-var mergeTrees = require('broccoli-merge-trees');
-
 module.exports = {
   name: 'ember-google-publisher-tags',
 
   contentFor: function(type, config) {
-    if (type === 'head-footer' && !this.app.options.gptIframeJail) {
+    if (type === 'head-footer' && !this.gptIframeJail) {
       return `
 <script type='text/javascript'>
   var googletag = googletag || {};
@@ -29,18 +26,12 @@ module.exports = {
   },
 
   config: function(env, config) {
-    if (this.app) {
-      // TODO: `this.app` check is necessary for "ember serve", but not "ember build": why?
-      this.app.options.gptIframeJail = config.gpt && config.gpt.iframeJail;
-    }
+    this.gptIframeJail = config.gpt && config.gpt.iframeJail;
   },
 
   treeForPublic: function(tree) {
-    if (this.app.options.gptIframeJail) {
-      var assetsTree = new Funnel('public');
-      return mergeTrees([tree, assetsTree], {
-        overwrite: true
-      });
+    if (this.gptIframeJail) {
+      return tree;
     }
   }
 };
