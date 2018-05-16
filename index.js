@@ -5,6 +5,7 @@ module.exports = {
   name: 'ember-google-publisher-tags',
 
   contentFor: function(type, config) {
+    const async = config.gpt && config.gpt.async;
     if (type === 'head-footer' && !this.gptIframeJail) {
       return `
 <script type='text/javascript'>
@@ -12,7 +13,7 @@ module.exports = {
   googletag.cmd = googletag.cmd || [];
   (function() {
     var gads = document.createElement('script');
-    gads.async = true;
+    gads.async = ${async ? 'true' : 'false'}
     gads.type = 'text/javascript';
     var useSSL = 'https:' == document.location.protocol;
     gads.src = (useSSL ? 'https:' : 'http:') +
