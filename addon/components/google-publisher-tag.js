@@ -6,6 +6,7 @@
 //    - width: ditto
 //
 // See README for optional/user-facing properties.
+/* globals $ */
 
 import Ember from 'ember';
 import InViewportMixin from 'ember-in-viewport';
@@ -160,7 +161,7 @@ export default Component.extend(InViewportMixin, {
             getProperties(this, 'iframeUrl', 'width', 'height', 'adId', 'targeting');
         let iframeExternalUrl = config.gpt && config.gpt.iframeExternalUrl;
 
-        let adParams = { adId, width, height }
+        let adParams = { adId, width, height };
         let targetingParams = Object.keys(targeting).map( k => {
             return [ k, targeting[k] ];
         });
@@ -175,7 +176,7 @@ export default Component.extend(InViewportMixin, {
         this.$().prepend(`<iframe style="display:none; width:${width}px; height:${height}px" frameBorder="0" src="${finalUrl}"></iframe>`);
 
         let frames = this.$('iframe');
-        let newAd = frames.get(0)
+        let newAd = frames.get(0);
         let existingAds = frames.length > 1 ? frames.slice(1) : this.$([]);
 
         this.$(newAd).on('load', () => {
