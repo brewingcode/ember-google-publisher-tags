@@ -151,7 +151,7 @@ that url ends with an unset query parameter: **this is required**.
     }
     ```
 
-3. The PHP that handlesgq}J the request looks very similar to
+3. The PHP that handles the request looks very similar to
 [gpt-iframe.html](public/gpt-iframe.html), except it decodes the query string and
 assigns `window.ad` and `window.targeting`. It also doesn't have to worry
 about polling the `window.startCallingGpt` variable, so that code is removed.
