@@ -79,6 +79,14 @@ export default GPT.extend({
 
 ## Configuration
 
+### gpt.async (default: false)
+
+By default, the `<script>` tag does not include the `async` attribute. If you
+want, you can add it by setting this config key to truthy.
+
+Note: this only affects the `<script>` tag that is appended to `<head>`, it
+does _not_ affect the iframe-based usage of this plugin.
+
 ### gpt.iframeJail: boolean (default: false)
 
 By default, GPT runs in your page's window. Since ads do all sorts of
